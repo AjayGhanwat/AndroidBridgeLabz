@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimaryDark"
+    tools:context="com.bridgelabz.ajayghanwat.displaydetails.Register">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:textSize="30dp"
+        android:textColor="#ffff"
+        android:gravity="center"
+        android:layout_margin="20dp"/>
+
+    <EditText
+        android:id="@+id/etxtuser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="username"
+        android:textSize="30dp"
+        android:textColor="#ffff"
+        android:layout_margin="20dp"/>
+
+    <EditText
+        android:id="@+id/etxtpass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="password"
+        android:textSize="30dp"
+        android:textColor="#ffff"
+        android:layout_margin="20dp"/>
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:layout_margin="20dp"
+        android:textSize="30dp"/>
+
+</LinearLayout>
