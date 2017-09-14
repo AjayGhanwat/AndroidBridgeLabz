@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">GoogleKeepDemo</string>
+    <string name="welcome">Welcome</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="icon">Icon</string>
+    <string name="register">Register</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="phone_mobile_number">Mobile Number</string>
+    <string name="reset_password">Reset Password!!</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="reset">Reset</string>
+    <string name="facebook_app_id">681544965381040</string>
+    <string name="fb_login_protocol_scheme">fb681544965381040</string>
+    <string name="username">Username</string>
+    <string name="pic">Pic</string>
+    <string name="Open">Open</string>
+    <string name="Close">Close</string>
+    <string name="homework_done">HomeWork Done</string>
+    <string name="note">Note</string>
+    <string name="title">Title</string>
+
+</resources>

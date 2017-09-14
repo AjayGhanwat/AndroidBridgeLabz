@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+    <item
+        android:id="@+id/userNotes"
+        android:icon="@drawable/ic_lightbulb_outline_black_24dp"
+        android:title="Notes">
+    </item>
+    <item
+        android:id="@+id/userReminder"
+        android:icon="@drawable/remind"
+        android:title="Reminder">
+    </item>
+    </group>
+    <group android:checkableBehavior="single">
+    <item
+        android:id="@+id/userNewLabel"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="Create New Label">
+    </item>
+    </group>
+    <group android:checkableBehavior="single">
+    <item
+        android:id="@+id/userArchive"
+        android:icon="@drawable/ic_archive_black_24dp"
+        android:title="Archive">
+    </item>
+    <item
+        android:id="@+id/userTrash"
+        android:icon="@drawable/ic_delete_black_24dp"
+        android:title="Trash">
+    </item>
+    </group>
+    <group android:checkableBehavior="single">
+    <item
+        android:id="@+id/userSetting"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="Setting">
+    </item>
+    <item
+        android:id="@+id/userHelp"
+        android:icon="@drawable/ic_help_black_24dp"
+        android:title="Help FeedBack">
+    </item>
+    </group>
+    <group android:checkableBehavior="single">
+    <item
+        android:id="@+id/userLogout"
+        android:icon="@drawable/ic_exit_to_app_black_24dp"
+        android:title="Logout">
+    </item>
+    </group>
+
+</menu>

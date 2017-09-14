@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/listNote"
+        android:title="List"
+        android:icon="@drawable/ic_list_black_24dp"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/drawNote"
+        android:title="Drwer"
+        android:icon="@drawable/ic_create_black_24dp"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/VoiceNote"
+        android:title="Voice"
+        android:icon="@drawable/ic_keyboard_voice_black_24dp"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/CameraNote"
+        android:title="Camera"
+        android:icon="@drawable/ic_camera_alt_black_24dp"
+        app:showAsAction="always"/>
+
+</menu>
