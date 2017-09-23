@@ -30,6 +30,16 @@ public class TrashFragmentPresenter implements TrashFragmentPresenterInterface{
     }
 
     @Override
+    public void showSearchData(RecyclerView recyclerView, String newText) {
+        interacterInterface.showSearch(recyclerView, newText);
+    }
+
+    @Override
+    public void refreshRecycler(RecyclerView recyclerView) {
+        interacterInterface.refreshrecycler(recyclerView);
+    }
+
+    @Override
     public void showRecyclerSuccess(String msg) {
         fragment.showRecyclerSuccess(msg);
     }

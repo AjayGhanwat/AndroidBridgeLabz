@@ -10,4 +10,8 @@ public interface NoteFragmentInteracterInterface {
     void swappableData(RecyclerView recyclerView);
 
     void undoChange();
+
+    void showSearchData(RecyclerView recyclerView, String newText);
+
+    void resetRecycler(RecyclerView recyclerView);
 }

@@ -11,4 +11,8 @@ public interface TrashFragmentPresenterInterface {
 
     void showSnacBar(String msg);
     void swappable(RecyclerView recyclerView);
+
+    void showSearchData(RecyclerView recyclerView, String newText);
+
+    void refreshRecycler(RecyclerView recyclerView);
 }

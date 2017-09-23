@@ -5,11 +5,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.bridgelabz.note.adapter.ArchiveDataAdapter;
+import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.adapter.TrashDataAdapter;
 import com.bridgelabz.note.login.view.LoginActivity;
 import com.bridgelabz.note.model.DataModel;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenter;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenterInterface;
+import com.bridgelabz.note.view.MainPanelActivity;
 import com.firebase.client.Firebase;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -153,6 +156,33 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
         recyclerView.addOnItemTouchListener(swipeTouchListener);
     }
+
+    @Override
+    public void showSearch(final RecyclerView recyclerView, String newText) {
+
+                if(newText != null && !newText.isEmpty()){
+
+                    ArrayList<DataModel> userNote = new ArrayList<DataModel>();
+                    for(DataModel item: data){
+                        if(item.getTitle().contains(newText)){
+                            userNote.add(item);
+                        }
+                        TrashDataAdapter dataAdapter1 = new TrashDataAdapter(userNote);
+                        recyclerView.refreshDrawableState();
+                        recyclerView.setAdapter(dataAdapter1);
+                        dataAdapter1.notifyDataSetChanged();
+                    }
+                }else {
+                    recyclerView.setAdapter(dataAdapter);
+                }
+
+    }
+
+    @Override
+    public void refreshrecycler(RecyclerView recyclerView) {
+        recyclerView.setAdapter(dataAdapter);
+    }
+
 
     boolean isDeleted = false;
     String mId;

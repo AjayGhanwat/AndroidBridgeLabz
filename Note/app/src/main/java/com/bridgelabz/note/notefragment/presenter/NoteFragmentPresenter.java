@@ -28,6 +28,16 @@ public class NoteFragmentPresenter implements NoteFragmentPresenterInterface{
     }
 
     @Override
+    public void searchItemData(RecyclerView recyclerView, String newText) {
+        interacterInterface.showSearchData(recyclerView, newText);
+    }
+
+    @Override
+    public void resetNoteRecycler(RecyclerView recyclerView) {
+        interacterInterface.resetRecycler(recyclerView);
+    }
+
+    @Override
     public void showRecyclerSuccess(String msg) {
         fragment.viewNoteRecyclerSuccess(msg);
     }

@@ -17,8 +17,8 @@ public class EditNotePresenter implements EditNotePresenterInterface {
 
     }
 
-    public void editnote(String title, String decs, String user_date, int user_color, String user_key) {
-        interacter.editNotes(title, decs, user_date, user_color, user_key);
+    public void editnote(String title, String decs, String user_date, int user_color, String user_key, boolean user_reminder ,String user_reminder_date, String user_reminder_time) {
+        interacter.editNotes(title, decs, user_date, user_color, user_key,user_reminder,user_reminder_date, user_reminder_time);
     }
 
     @Override

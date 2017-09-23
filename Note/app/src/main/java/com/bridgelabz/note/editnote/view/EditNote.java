@@ -1,12 +1,17 @@
 package com.bridgelabz.note.editnote.view;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bridgelabz.note.R;
@@ -16,18 +21,28 @@ import com.bridgelabz.note.editnote.presenter.EditNotePresenter;
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 
+import java.util.Calendar;
+
 import static com.bridgelabz.note.R.array.colorArray;
 
 public class EditNote extends BaseActivity implements EditNotesInterface, ColorDialog.OnColorSelectedListener{
 
     EditText usertitle, userdesc;
 
-    String user_title, user_desc, user_key, user_date;;
+    String user_title, user_desc, user_key, user_date, user_reminder_date, user_reminder_time;
     int user_color;
+    boolean user_reminder;
 
     String title,decs;
 
     EditNotePresenter presenter;
+
+    private int Dialog_ID = 0;
+    int year_x,month_x,day_x;
+    Calendar calendar;
+    int hour_x;
+    int minute_x;
+    private int TimeDialog_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +66,9 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
         user_key = extras.getString("Key");
         user_color = extras.getInt("Color");
         user_date = extras.getString("Date");
+        user_reminder_date = extras.getString("reminderDate");
+        user_reminder_time = extras.getString("reminderTime");
+        user_reminder = extras.getBoolean("reminder");
 
         usertitle.setText(user_title);
         userdesc.setText(user_desc);
@@ -83,10 +101,29 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
 
         if (id == R.id.alarmNote) {
 
+            showDateDialogPicker();
 
         } else if (id == R.id.saveNote) {
 
-            presenter.editnote(title, decs, user_date, user_color, user_key);
+            String mMonth;
+
+            if(month_x < 10) {
+                mMonth = "0" + month_x;
+            }else {
+                mMonth = month_x + "";
+            }
+
+            user_reminder_date = year_x + "-" + mMonth + "-" + day_x;
+
+            user_reminder_time = hour_x + "-" + minute_x;
+
+            if(user_reminder_date.equals("0-0-0")){
+                user_reminder = false;
+            }else{
+                user_reminder = true;
+            }
+
+            presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder,user_reminder_date, user_reminder_time);
 
             onSupportNavigateUp();
 
@@ -159,4 +196,57 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
     public void dismissProgressBar() {
         progress.dismiss();
     }
+
+    public void showDateDialogPicker(){
+
+        calendar = Calendar.getInstance();
+
+        year_x = calendar.get(Calendar.YEAR);
+        month_x = calendar.get(Calendar.MONTH);
+        day_x = calendar.get(Calendar.DAY_OF_MONTH);
+
+        showDialog(Dialog_ID);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+
+        if(Dialog_ID == id){
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this, datepickerListener, year_x, month_x, day_x);
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
+            return datePickerDialog;
+        }else if(TimeDialog_ID == id){
+
+            TimePickerDialog timePickerDialog = new TimePickerDialog(this, timePickerLitner, hour_x, minute_x, false);
+            return timePickerDialog;
+        }
+
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener datepickerListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+            year_x = year;
+            month_x = month + 1;
+            day_x = dayOfMonth;
+
+            showTimeDialogPicker();
+
+        }
+    };
+
+    private void showTimeDialogPicker() {
+        showDialog(TimeDialog_ID);
+    }
+
+    private TimePickerDialog.OnTimeSetListener timePickerLitner = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            hour_x = hourOfDay;
+            minute_x = minute;
+        }
+    };
 }

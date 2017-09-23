@@ -32,7 +32,7 @@ public class AddNotesInteracter implements AddNotesInteracterInterface{
     DatabaseReference reference;
 
     @Override
-    public void addNoteFirebaase(String title, String decs,int userColor) {
+    public void addNoteReminderFirebaase(String title, String decs,int userColor,boolean reminder, String reminderDate, String reminderTime) {
 
         presenter.showProgresss("Adding Note");
 
@@ -87,6 +87,9 @@ public class AddNotesInteracter implements AddNotesInteracterInterface{
         reference.child("color").setValue(userColor);
         reference.child("archive").setValue(false);
         reference.child("trash").setValue(false);
+        reference.child("reminderdate").setValue(reminderDate);
+        reference.child("remindertime").setValue(reminderTime);
+        reference.child("reminder").setValue(reminder);
 
         presenter.addNoteSuccess("Success");
         presenter.dismissProgress();

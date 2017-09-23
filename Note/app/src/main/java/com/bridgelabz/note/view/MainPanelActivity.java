@@ -3,8 +3,6 @@ package com.bridgelabz.note.view;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,17 +17,18 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.archivefragment.view.ArchiveFragment;
 import com.bridgelabz.note.login.view.LoginActivity;
 import com.bridgelabz.note.notefragment.View.NoteFragment;
+import com.bridgelabz.note.reminderfragment.view.ReminderFragment;
 import com.bridgelabz.note.trashfragment.view.TrashFragment;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 public class MainPanelActivity extends AppCompatActivity {
 
@@ -51,7 +50,7 @@ public class MainPanelActivity extends AppCompatActivity {
 
     String fragName = "Note";
 
-    String userLastName, userFirstName;
+    public static MaterialSearchView materialSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +63,69 @@ public class MainPanelActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        materialSearchView = (MaterialSearchView) findViewById(R.id.searchViewBar);
+
+        materialSearchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+
+                if(fragName.equals("Note")){
+
+                    NoteFragment.resetRecyclerView();
+
+                }else if(fragName.equals("Reminder")) {
+
+                    ReminderFragment.resetRecyclerView();
+
+                }else if(fragName.equals("Archive")){
+
+                    ArchiveFragment.resetRecyclerView();
+
+                }else if(fragName.equals("Trash")){
+
+                    TrashFragment.resetRecyclerView();
+
+                }
+
+            }
+        });
+
+        materialSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if(fragName.equals("Note")){
+
+                    NoteFragment.searchItem(newText);
+
+                }else if(fragName.equals("Reminder")){
+
+                    ReminderFragment.searchItem(newText);
+
+                }else if(fragName.equals("Archive")){
+
+                    ArchiveFragment.searchItem(newText);
+
+                }else if(fragName.equals("Trash")){
+
+                    TrashFragment.searchItem(newText);
+
+                }
+
+                return true;
+            }
+        });
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerMainMenu);
 
@@ -167,21 +229,26 @@ public class MainPanelActivity extends AppCompatActivity {
 
         getMenuInflater().inflate(R.menu.main_panel_menu, menu);
 
+        MenuItem item = menu.findItem(R.id.search);
+        materialSearchView.setMenuItem(item);
+
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId() == R.id.search_bar) {
-            
-        }else if(item.getItemId() == R.id.layoutManager) {
+        if(item.getItemId() == R.id.layoutManager) {
+
             if (fragName.equals("Note"))
                 NoteFragment.onItemSelected(item);
+            else if (fragName.equals("Reminder"))
+                ReminderFragment.onItemSelected(item);
             else if (fragName.equals("Archive"))
                 ArchiveFragment.onItemSelected(item);
             else if (fragName.equals("Trash"))
                 TrashFragment.onItemSelected(item);
+
         }
 
         return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);

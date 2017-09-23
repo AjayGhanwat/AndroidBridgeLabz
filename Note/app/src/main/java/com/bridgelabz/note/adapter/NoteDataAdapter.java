@@ -74,6 +74,9 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
                     String user_key = list.get(getAdapterPosition()).getKey();
                     int user_color = list.get(getAdapterPosition()).getColor();
                     String user_date = list.get(getAdapterPosition()).getDate();
+                    boolean user_reminder = list.get(getAdapterPosition()).getReminder();
+                    String user_reminder_date = list.get(getAdapterPosition()).getReminderDate();
+                    String user_reminder_time = list.get(getAdapterPosition()).getReminderTime();
 
                     Intent intent = new Intent(itemView.getContext(),EditNote.class);
                     intent.putExtra("Title", user_title);
@@ -81,6 +84,9 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
                     intent.putExtra("Key", user_key);
                     intent.putExtra("Color", user_color);
                     intent.putExtra("Date", user_date);
+                    intent.putExtra("reminderDate", user_reminder_date);
+                    intent.putExtra("reminderTime", user_reminder_time);
+                    intent.putExtra("reminder", user_reminder);
                     itemView.getContext().startActivity(intent);
 
                 }

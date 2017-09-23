@@ -33,6 +33,16 @@ public class ArchiveFragmentPresenter implements ArchiveFragmentPresenterInterfa
     }
 
     @Override
+    public void showSearch(RecyclerView recyclerView, String newText) {
+        interacterInterface.showSearch(recyclerView, newText);
+    }
+
+    @Override
+    public void refressRecycler(RecyclerView recyclerView) {
+        interacterInterface.refreshRecyclerData(recyclerView);
+    }
+
+    @Override
     public void showRecyclerSuccess(String msg) {
         archiveFragment.showRecyclerSuccess(msg);
     }

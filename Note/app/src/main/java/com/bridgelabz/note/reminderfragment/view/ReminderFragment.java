@@ -1,4 +1,4 @@
-package com.bridgelabz.note.notefragment.View;
+package com.bridgelabz.note.reminderfragment.view;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
@@ -11,7 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,20 +19,17 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bridgelabz.note.R;
-import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.addnotes.view.AddActivity;
 import com.bridgelabz.note.base.BaseFragment;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenter;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenterInterface;
-import com.bridgelabz.note.view.MainPanelActivity;
-import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
+import com.bridgelabz.note.reminderfragment.presenter.ReminderFragmentPresenter;
+import com.bridgelabz.note.reminderfragment.presenter.ReminderFragmentPresenterInterface;
 
-import static android.R.interpolator.linear;
 import static com.bridgelabz.note.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.note.R.drawable.ic_view_quilt_black_24dp;
 
-public class NoteFragment extends BaseFragment implements NoteFragmentInterface {
+public class ReminderFragment extends BaseFragment implements ReminderFragmentInterface{
 
     View v;
     static RecyclerView recyclerView;
@@ -45,12 +41,12 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
     RelativeLayout relativeLayout;
 
-    static NoteFragmentPresenterInterface presenter;
+    static ReminderFragmentPresenterInterface presenter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_note, container, false);
+        return inflater.inflate(R.layout.activity_reminder, container, false);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -60,7 +56,7 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
         this.v = view;
 
-        relativeLayout = (RelativeLayout) v.findViewById(R.id.relativeLayoutManager);
+        relativeLayout = (RelativeLayout) v.findViewById(R.id.relativeLayoutReminder);
 
         linearLayoutManager = new LinearLayoutManager(getContext());
         gridLayoutManager = new StaggeredGridLayoutManager(2, 1);
@@ -69,6 +65,7 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
         initView();
         clickListning();
+
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -84,59 +81,14 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
     public void onStart() {
         super.onStart();
         presenter.showRecycler(recyclerView);
-        presenter.swappable(recyclerView);
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void viewNoteRecyclerSuccess(String msg) {
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void viewNoteRecyclerUnsuccess(String msg) {
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void viewNoteRecyclerProgressShow(String msg) {
-
-        progress = new ProgressDialog(getContext());
-        progress.setMessage(msg);
-        progress.show();
-    }
-
-    @Override
-    public void viewNoteRecyclerProgressDismis() {
-        progress.dismiss();
-    }
-
-    @Override
-    public void viewSnacBar(String msg) {
-        Snackbar snackbar = Snackbar
-                .make(relativeLayout, msg, Snackbar.LENGTH_LONG)
-                .setAction("UNDO", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        presenter.undoChange();
-                        presenter.showRecycler(recyclerView);
-                        Snackbar snackbar1 = Snackbar.make(relativeLayout,"Note Restored!", Snackbar.LENGTH_SHORT);
-                        snackbar1.show();
-                    }
-                });
-
-        snackbar.show();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void initView() {
+        presenter = new ReminderFragmentPresenter(getContext(),this);
 
-        presenter = new NoteFragmentPresenter(getContext(),this);
-
-        recyclerView = (RecyclerView) v.findViewById(R.id.recyclerNote);
+        recyclerView = (RecyclerView) v.findViewById(R.id.recyclerReminder);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
     }
@@ -144,6 +96,31 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
     @Override
     public void clickListning() {
 
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void viewRemminderRecyclerSuccess(String msg) {
+        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void viewReminderRecyclerUnsuccess(String msg) {
+        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void viewReminderRecyclerProgressShow(String msg) {
+        progress = new ProgressDialog(getContext());
+        progress.setMessage(msg);
+        progress.show();
+    }
+
+    @Override
+    public void viewReminderRecyclerProgressDismis() {
+        progress.dismiss();
     }
 
     public static void onItemSelected(MenuItem item) {

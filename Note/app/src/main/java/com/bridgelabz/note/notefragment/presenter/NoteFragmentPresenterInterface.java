@@ -16,4 +16,8 @@ public interface NoteFragmentPresenterInterface {
     void swappable(RecyclerView recyclerView);
 
     void undoChange();
+
+    void searchItemData(RecyclerView recyclerView, String newText);
+
+    void resetNoteRecycler(RecyclerView recyclerView);
 }

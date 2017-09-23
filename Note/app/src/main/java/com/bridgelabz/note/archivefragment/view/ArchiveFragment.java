@@ -43,7 +43,7 @@ public class ArchiveFragment extends BaseFragment implements ArchiveFragmentInte
 
     RelativeLayout relativeLayout;
 
-    ArchiveFragmentPresenterInterface presenter;
+    static ArchiveFragmentPresenterInterface presenter;
 
     @Nullable
     @Override
@@ -149,5 +149,13 @@ public class ArchiveFragment extends BaseFragment implements ArchiveFragmentInte
                 });
 
         snackbar.show();
+    }
+
+    public static void searchItem(String newText) {
+        presenter.showSearch(recyclerView, newText);
+    }
+
+    public static void resetRecyclerView() {
+        presenter.refressRecycler(recyclerView);
     }
 }

@@ -2,5 +2,5 @@ package com.bridgelabz.note.addnotes.interacter;
 
 public interface AddNotesInteracterInterface {
 
-    void addNoteFirebaase(String title, String decs,int userColor);
+    void addNoteReminderFirebaase(String title, String decs, int userColor, boolean reminder, String reminderDate, String reminderTime);
 }

@@ -162,6 +162,31 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
             reference.child("trash").setValue(false);
     }
 
+    @Override
+    public void showSearchData(final RecyclerView recyclerView, String newText) {
+
+        if (newText != null && !newText.isEmpty()) {
+
+            ArrayList<DataModel> userNote = new ArrayList<DataModel>();
+            for (DataModel item : data) {
+                if (item.getTitle().contains(newText)) {
+                    userNote.add(item);
+                }
+                NoteDataAdapter dataAdapter1 = new NoteDataAdapter(userNote);
+                recyclerView.refreshDrawableState();
+                recyclerView.setAdapter(dataAdapter1);
+                dataAdapter1.notifyDataSetChanged();
+            }
+        } else {
+            recyclerView.setAdapter(dataAdapter);
+        }
+    }
+
+    @Override
+    public void resetRecycler(RecyclerView recyclerView) {
+        recyclerView.setAdapter(dataAdapter);
+    }
+
     void changeDataArchive(final String id,String date){
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();

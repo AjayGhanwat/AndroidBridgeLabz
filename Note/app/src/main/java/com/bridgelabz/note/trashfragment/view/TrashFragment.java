@@ -39,7 +39,7 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
 
-    TrashFragmentPresenterInterface presenter;
+    static TrashFragmentPresenterInterface presenter;
 
     @Nullable
     @Override
@@ -135,4 +135,11 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
         }
     }
 
+    public static void searchItem(String newText) {
+        presenter.showSearchData(recyclerView, newText);
+    }
+
+    public static void resetRecyclerView() {
+        presenter.refreshRecycler(recyclerView);
+    }
 }

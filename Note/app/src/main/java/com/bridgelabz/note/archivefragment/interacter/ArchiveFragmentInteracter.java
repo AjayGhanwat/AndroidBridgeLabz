@@ -5,11 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.bridgelabz.note.adapter.ArchiveDataAdapter;
-import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.archivefragment.presenter.ArchiveFragmentPresenter;
 import com.bridgelabz.note.archivefragment.presenter.ArchiveFragmentPresenterInterface;
 import com.bridgelabz.note.model.DataModel;
-import com.firebase.client.Firebase;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -20,8 +18,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 
 import java.util.ArrayList;
-
-import static junit.runner.Version.id;
 
 public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInterface{
 
@@ -163,6 +159,31 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
         reference = FirebaseDatabase.getInstance().getReference().child("Data").child(userID).child(date).child(id);
 
         reference.child("archive").setValue(true);
+    }
+
+    @Override
+    public void showSearch(final RecyclerView recyclerView, String newText) {
+
+        if (newText != null && !newText.isEmpty()) {
+
+            ArrayList<DataModel> userNote = new ArrayList<DataModel>();
+            for (DataModel item : data) {
+                if (item.getTitle().contains(newText)) {
+                    userNote.add(item);
+                }
+                ArchiveDataAdapter dataAdapter1 = new ArchiveDataAdapter(userNote);
+                recyclerView.refreshDrawableState();
+                recyclerView.setAdapter(dataAdapter1);
+                dataAdapter1.notifyDataSetChanged();
+            }
+        } else {
+            recyclerView.setAdapter(dataAdapter);
+        }
+    }
+
+    @Override
+    public void refreshRecyclerData(RecyclerView recyclerView) {
+        recyclerView.setAdapter(dataAdapter);
     }
 
     void changeDataArchive(final String id,String date){

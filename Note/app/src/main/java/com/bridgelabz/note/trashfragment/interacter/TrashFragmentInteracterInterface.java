@@ -6,4 +6,8 @@ public interface TrashFragmentInteracterInterface {
     void showRecyclerData(RecyclerView recyclerView);
 
     void swappableData(RecyclerView recyclerView);
+
+    void showSearch(RecyclerView recyclerView,String newText);
+
+    void refreshrecycler(RecyclerView recyclerView);
 }

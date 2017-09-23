@@ -13,4 +13,8 @@ public interface ArchiveFragmentPresenterInterface {
     void swappable(RecyclerView recyclerView);
 
     void undoChange();
+
+    void showSearch(RecyclerView recyclerView, String newText);
+
+    void refressRecycler(RecyclerView recyclerView);
 }

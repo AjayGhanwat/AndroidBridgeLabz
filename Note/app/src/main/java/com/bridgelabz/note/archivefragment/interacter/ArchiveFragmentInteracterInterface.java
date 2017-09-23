@@ -8,4 +8,8 @@ public interface ArchiveFragmentInteracterInterface {
     void swappableData(RecyclerView recyclerView);
 
     void undoChangeData();
+
+    void showSearch(RecyclerView recyclerView, String newText);
+
+    void refreshRecyclerData(RecyclerView recyclerView);
 }

@@ -9,12 +9,15 @@ public class DataModel {
     private String Date;
     private boolean Archive;
     private boolean Trash;
+    private boolean Reminder;
+    private String reminderdate;
+    private String remindertime;
 
 
     public DataModel() {
     }
 
-    public DataModel(String title, String desc, String key, int color, String date, boolean archive,boolean trash) {
+    public DataModel(String title, String desc, String key, int color, String date, boolean archive,boolean trash, boolean reminder, String reminderDate, String reminderTime) {
         Title = title;
         Desc = desc;
         Key = key;
@@ -22,6 +25,9 @@ public class DataModel {
         Date = date;
         Archive = archive;
         Trash = trash;
+        Reminder = reminder;
+        reminderdate = reminderDate;
+        remindertime = reminderTime;
 
     }
 
@@ -79,5 +85,29 @@ public class DataModel {
 
     public void setTrash(boolean trash) {
         Trash = trash;
+    }
+
+    public boolean getReminder() {
+        return Reminder;
+    }
+
+    public void setReminder(boolean reminder) {
+        Reminder = reminder;
+    }
+
+    public String getReminderDate() {
+        return reminderdate;
+    }
+
+    public void setReminderDate(String reminderDate) {
+        this.reminderdate = reminderDate;
+    }
+
+    public String getReminderTime() {
+        return remindertime;
+    }
+
+    public void setReminderTime(String reminderTime) {
+        this.remindertime = reminderTime;
     }
 }

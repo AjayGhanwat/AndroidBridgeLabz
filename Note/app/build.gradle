@@ -59,5 +59,6 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:4.1.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
     compile 'com.github.brnunes:swipeablerecyclerview:1.0.2'
+    compile 'com.miguelcatalan:materialsearchview:1.4.0'
 }
 apply plugin: 'com.google.gms.google-services'

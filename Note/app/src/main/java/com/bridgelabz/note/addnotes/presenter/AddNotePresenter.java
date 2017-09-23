@@ -16,8 +16,8 @@ public class AddNotePresenter implements AddNotePresenterInterface{
         interacter = new AddNotesInteracter(context, this);
     }
 
-    public void addnote(String title, String decs, int userColor) {
-        interacter.addNoteFirebaase(title,decs, userColor);
+    public void addnoteReminder(String title, String decs, int userColor,boolean reminder, String reminderDate, String reminderTime) {
+        interacter.addNoteReminderFirebaase(title,decs, userColor, reminder , reminderDate, reminderTime);
     }
 
     @Override
@@ -39,5 +39,4 @@ public class AddNotePresenter implements AddNotePresenterInterface{
     public void dismissProgress() {
         activity.dismissProgressBar();
     }
-
 }
