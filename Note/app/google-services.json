@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "658817250459",
+    "firebase_url": "https://note-2a7f9.firebaseio.com",
+    "project_id": "note-2a7f9",
+    "storage_bucket": "note-2a7f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658817250459:android:a0b764a0709e056b",
+        "android_client_info": {
+          "package_name": "com.bridgelabz.note"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "658817250459-i5n4oef3m8d9vi5b9us1iljrl11usvaa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bridgelabz.note",
+            "certificate_hash": "5a9ba70a1ac450a1ff0fddb9434befbb2c4e3ac5"
+          }
+        },
+        {
+          "client_id": "658817250459-0tr2cvaa7o2e9k1e1i6o5tps7kff4d05.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGNiOFsaxxyu4wOqS78hPYZFDrkVZ9t0g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "658817250459-0tr2cvaa7o2e9k1e1i6o5tps7kff4d05.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,11 @@
+package com.bridgelabz.note.archivefragment.interacter;
+
+import android.support.v7.widget.RecyclerView;
+
+public interface ArchiveFragmentInteracterInterface {
+    void showRecyclerData(RecyclerView recyclerView);
+
+    void swappableData(RecyclerView recyclerView);
+
+    void undoChangeData();
+}
