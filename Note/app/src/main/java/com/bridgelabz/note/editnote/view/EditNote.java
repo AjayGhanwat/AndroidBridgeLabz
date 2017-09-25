@@ -18,6 +18,7 @@ import com.bridgelabz.note.R;
 import com.bridgelabz.note.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.note.base.BaseActivity;
 import com.bridgelabz.note.editnote.presenter.EditNotePresenter;
+import com.bridgelabz.note.view.ScheduleClient;
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 
@@ -38,11 +39,13 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
     EditNotePresenter presenter;
 
     private int Dialog_ID = 0;
-    int year_x,month_x,day_x;
+    public static int year_x,month_x,day_x;
     Calendar calendar;
-    int hour_x;
-    int minute_x;
+    public static int hour_x;
+    public static int minute_x;
     private int TimeDialog_ID = 1;
+
+    public static ScheduleClient scheduleClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,9 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
         }else{
             getWindow().getDecorView().setBackgroundColor(user_color);
         }
+
+        scheduleClient = new ScheduleClient(this);
+        scheduleClient.doBindService();
     }
 
     @Override
@@ -88,6 +94,12 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
 
     @Override
     public boolean onSupportNavigateUp() {
+
+        if (scheduleClient != null)
+            scheduleClient.doUnbindService();
+
+        onBackPressed();
+
         onBackPressed();
         return true;
     }

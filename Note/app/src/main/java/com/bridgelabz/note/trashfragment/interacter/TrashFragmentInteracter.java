@@ -3,16 +3,12 @@ package com.bridgelabz.note.trashfragment.interacter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.bridgelabz.note.adapter.ArchiveDataAdapter;
-import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.adapter.TrashDataAdapter;
-import com.bridgelabz.note.login.view.LoginActivity;
 import com.bridgelabz.note.model.DataModel;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenter;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenterInterface;
-import com.bridgelabz.note.view.MainPanelActivity;
-import com.firebase.client.Firebase;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -21,13 +17,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import static android.R.attr.id;
 
 public class TrashFragmentInteracter implements TrashFragmentInteracterInterface{
 
@@ -41,6 +32,7 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
     }
 
     ArrayList<DataModel> data;
+
     TrashDataAdapter dataAdapter;
 
     FirebaseAuth mAuth;
@@ -73,6 +65,7 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
                     boolean isTrash = match.getTrash();
 
                     if (isTrash) {
+
                         data.add(match);
                         Log.i("sd", "onChildAdded: " + match);
                         dataAdapter = new TrashDataAdapter(data);
@@ -84,6 +77,9 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+
+                dataAdapter.notifyDataSetChanged();
 
             }
 
@@ -125,7 +121,7 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
                                     id = data.get(position).getKey();
                                     date = data.get(position).getDate();
-                                    changeDataDelete(id,date,recyclerView);
+                                    changeDataDelete(id, date, recyclerView);
                                     dataAdapter = new TrashDataAdapter(data);
                                     recyclerView.setAdapter(dataAdapter);
                                     dataAdapter.notifyDataSetChanged();

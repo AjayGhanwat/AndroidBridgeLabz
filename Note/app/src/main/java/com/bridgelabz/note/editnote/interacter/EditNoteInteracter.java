@@ -5,9 +5,19 @@ import android.content.Context;
 import com.bridgelabz.note.addnotes.presenter.AddNotePresenterInterface;
 import com.bridgelabz.note.editnote.presenter.EditNotePresenter;
 import com.bridgelabz.note.editnote.presenter.EditNotePresenterInterface;
+import com.bridgelabz.note.editnote.view.EditNote;
+import com.bridgelabz.note.view.ScheduleClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
+
+import static com.bridgelabz.note.editnote.view.EditNote.day_x;
+import static com.bridgelabz.note.editnote.view.EditNote.hour_x;
+import static com.bridgelabz.note.editnote.view.EditNote.minute_x;
+import static com.bridgelabz.note.editnote.view.EditNote.month_x;
+import static com.bridgelabz.note.editnote.view.EditNote.year_x;
 
 public class EditNoteInteracter implements EditNoteInteracterInterface {
 
@@ -43,6 +53,17 @@ public class EditNoteInteracter implements EditNoteInteracterInterface {
         reference.child("reminder").setValue(user_reminder);
         reference.child("reminderdate").setValue(user_reminder_date);
         reference.child("remindertime").setValue(user_reminder_time);
+
+        if(user_reminder){
+
+            Calendar c = Calendar.getInstance();
+            c.set(year_x, month_x - 1, day_x);
+            c.set(Calendar.HOUR_OF_DAY, hour_x);
+            c.set(Calendar.MINUTE, minute_x);
+            c.set(Calendar.SECOND, 0);
+
+            EditNote.scheduleClient.setAlarmForNotification(c);
+        }
 
         presenter.editNoteSuccess("Success");
         presenter.dismissProgress();

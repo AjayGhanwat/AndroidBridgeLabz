@@ -6,9 +6,6 @@ import android.util.Log;
 
 import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.model.DataModel;
-import com.bridgelabz.note.notefragment.interacter.NoteFragmentInteracterInterface;
-import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenter;
-import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenterInterface;
 import com.bridgelabz.note.reminderfragment.presenter.ReminderFragmentPresenter;
 import com.bridgelabz.note.reminderfragment.presenter.ReminderFragmentPresenterInterface;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,8 +19,6 @@ import com.google.firebase.database.GenericTypeIndicator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
-import static android.content.ContentValues.TAG;
 
 public class ReminderFragmentInteracter implements ReminderFragmentInteracterInterface {
 
@@ -64,9 +59,7 @@ public class ReminderFragmentInteracter implements ReminderFragmentInteracterInt
                     Date date = new Date();
                     String fdate = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
-                    Log.i("Date", "onChildAdded: " + match.getReminderDate());
-
-                if(fdate.equals(match.getReminderDate())) {
+                    if (fdate.equals(match.getReminderDate())) {
 
                         boolean isArchive = match.getArchive();
 

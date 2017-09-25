@@ -3,7 +3,6 @@
           package="com.bridgelabz.note">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -38,6 +37,9 @@
         </activity>
         <activity android:name=".editnote.view.EditNote">
         </activity>
+
+        <service android:name=".view.NotifyService" />
+        <service android:name=".view.ScheduleService" />
     </application>
 
 </manifest>

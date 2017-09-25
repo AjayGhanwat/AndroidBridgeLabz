@@ -19,31 +19,55 @@ import android.widget.Toast;
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.note.base.BaseActivity;
+import com.bridgelabz.note.view.ScheduleClient;
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 
 import java.util.Calendar;
 
-import static android.R.attr.id;
 import static com.bridgelabz.note.R.array.colorArray;
 
 public class AddActivity extends BaseActivity implements AddNotesInterface, ColorDialog.OnColorSelectedListener {
 
     EditText mTitle, mDecs;
 
-    String title, decs;
+    public static String title;
+    public static String decs;
 
     AddNotePresenter presenter;
     ProgressDialog progress;
-
-    private int Dialog_ID = 0;
-    int year_x,month_x,day_x;
+    int year_x, month_x, day_x;
+    int mYear, mMonth, mDay;
     Calendar calendar;
     int hour_x;
     int minute_x;
-    private int TimeDialog_ID = 1;
-
     int userColor = 16777215;
+    private int Dialog_ID = 0;
+    private int TimeDialog_ID = 1;
+    private ScheduleClient scheduleClient;
+    private DatePickerDialog.OnDateSetListener datepickerListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+            year_x = year;
+            month_x = month + 1;
+            day_x = dayOfMonth;
+
+            mYear = year_x;
+            mMonth = month_x;
+            mDay = day_x;
+
+            showTimeDialogPicker();
+
+        }
+    };
+    private TimePickerDialog.OnTimeSetListener timePickerLitner = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            hour_x = hourOfDay;
+            minute_x = minute;
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +83,17 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         initView();
+
+        scheduleClient = new ScheduleClient(this);
+        scheduleClient.doBindService();
     }
 
     @Override
     public boolean onSupportNavigateUp() {
+
+        if (scheduleClient != null)
+            scheduleClient.doUnbindService();
+
         onBackPressed();
 
         return true;
@@ -91,25 +122,31 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
         } else if (id == R.id.saveNote) {
 
-            if(year_x != 0 && month_x != 0 && day_x != 0) {
+            if (mYear != 0 && mMonth != 0 && mDay!= 0) {
+                Calendar c = Calendar.getInstance();
+                c.set(mYear, mMonth -1, mDay);
+                c.set(Calendar.HOUR_OF_DAY, hour_x);
+                c.set(Calendar.MINUTE, minute_x);
+                c.set(Calendar.SECOND, 0);
+
+                scheduleClient.setAlarmForNotification(c);
 
                 String mMonth;
 
                 reminder = true;
 
-                if(month_x < 10) {
+                if (month_x < 10) {
                     mMonth = "0" + month_x;
-                }else {
+                } else {
                     mMonth = month_x + "";
                 }
-
 
                 ReminderDate = year_x + "-" + mMonth + "-" + day_x;
 
                 ReminderTime = hour_x + "-" + minute_x;
 
                 presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
-            }else {
+            } else {
                 presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
             }
             onSupportNavigateUp();
@@ -175,7 +212,7 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
         getWindow().getDecorView().setBackgroundColor(userColor);
     }
 
-    public void showDateDialogPicker(){
+    public void showDateDialogPicker() {
 
         calendar = Calendar.getInstance();
 
@@ -189,13 +226,13 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
     @Override
     protected Dialog onCreateDialog(int id) {
 
-        if(Dialog_ID == id){
+        if (Dialog_ID == id) {
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(this, datepickerListener, year_x, month_x, day_x);
             datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
 
             return datePickerDialog;
-        }else if(TimeDialog_ID == id){
+        } else if (TimeDialog_ID == id) {
 
             TimePickerDialog timePickerDialog = new TimePickerDialog(this, timePickerLitner, hour_x, minute_x, false);
             return timePickerDialog;
@@ -204,28 +241,8 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
         return null;
     }
 
-    private DatePickerDialog.OnDateSetListener datepickerListener = new DatePickerDialog.OnDateSetListener() {
-        @Override
-        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-            year_x = year;
-            month_x = month + 1;
-            day_x = dayOfMonth;
-
-            showTimeDialogPicker();
-
-        }
-    };
-
     private void showTimeDialogPicker() {
         showDialog(TimeDialog_ID);
     }
-
-    private TimePickerDialog.OnTimeSetListener timePickerLitner = new TimePickerDialog.OnTimeSetListener() {
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            hour_x = hourOfDay;
-            minute_x = minute;
-        }
-    };
 
 }
