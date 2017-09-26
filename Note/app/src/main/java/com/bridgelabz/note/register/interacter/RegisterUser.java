@@ -37,26 +37,28 @@ public class RegisterUser implements RegisterUserInterface {
         database = FirebaseDatabase.getInstance();
         reference = database.getReference();
 
-        mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
+        mAuth.createUserWithEmailAndPassword(email, pass)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
 
-                    String userId = mAuth.getCurrentUser().getUid();
-                    DatabaseReference currentUser = reference.child("Users").child(userId);
+                        if (task.isSuccessful()) {
+                            String userId = mAuth.getCurrentUser().getUid();
+                            DatabaseReference currentUser = reference.child("Users").child(userId);
 
-                    currentUser.child(Constant.firebase_database_key_first).setValue(first);
-                    currentUser.child(Constant.firebase_database_key_last).setValue(last);
-                    currentUser.child(Constant.firebase_database_key_phone).setValue(phone);
+                            currentUser.child(Constant.firebase_database_key_first).setValue(first);
+                            currentUser.child(Constant.firebase_database_key_last).setValue(last);
+                            currentUser.child(Constant.firebase_database_key_phone).setValue(phone);
 
-                    registerUserData.registerSucces(Constant.login_success);
-                    registerUserData.hideProgressDialog();
+                            registerUserData.registerSucces(Constant.login_success);
+                            registerUserData.hideProgressDialog();
 
-                } else {
-                    registerUserData.registerUnsucces(Constant.register_unsuccess);
-                    registerUserData.hideProgressDialog();
-                }
-            }
-        });
+                        } else {
+                            registerUserData.registerUnsucces(Constant.register_unsuccess);
+                            registerUserData.hideProgressDialog();
+
+                        }
+                    }
+                });
     }
 }

@@ -1,11 +1,14 @@
 package com.bridgelabz.note.view;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,46 +19,55 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.archivefragment.view.ArchiveFragment;
 import com.bridgelabz.note.login.view.LoginActivity;
+import com.bridgelabz.note.model.UserData;
 import com.bridgelabz.note.notefragment.View.NoteFragment;
 import com.bridgelabz.note.reminderfragment.view.ReminderFragment;
 import com.bridgelabz.note.trashfragment.view.TrashFragment;
 import com.bumptech.glide.Glide;
+import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
+
+import java.io.IOException;
 
 public class MainPanelActivity extends AppCompatActivity {
 
+    public static MaterialSearchView materialSearchView;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
     Toolbar toolbar;
     ProgressDialog progress;
-
     FirebaseAuth mAuth;
-
     String userName;
     String userEmail;
     Uri userPic;
-
     NavigationView nav_view;
-
     TextView user_Name, user_Email;
     ImageView user_Pic;
-
     String fragName = "Note";
-
-    public static MaterialSearchView materialSearchView;
+    boolean isPicEditable = false;
+    int SELECT_IMAGE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_panel);
+
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -75,24 +87,23 @@ public class MainPanelActivity extends AppCompatActivity {
             @Override
             public void onSearchViewClosed() {
 
-                if(fragName.equals("Note")){
+                if (fragName.equals("Note")) {
 
                     NoteFragment.resetRecyclerView();
 
-                }else if(fragName.equals("Reminder")) {
+                } else if (fragName.equals("Reminder")) {
 
                     ReminderFragment.resetRecyclerView();
 
-                }else if(fragName.equals("Archive")){
+                } else if (fragName.equals("Archive")) {
 
                     ArchiveFragment.resetRecyclerView();
 
-                }else if(fragName.equals("Trash")){
+                } else if (fragName.equals("Trash")) {
 
                     TrashFragment.resetRecyclerView();
 
                 }
-
             }
         });
 
@@ -105,19 +116,19 @@ public class MainPanelActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
 
-                if(fragName.equals("Note")){
+                if (fragName.equals("Note")) {
 
                     NoteFragment.searchItem(newText);
 
-                }else if(fragName.equals("Reminder")){
+                } else if (fragName.equals("Reminder")) {
 
                     ReminderFragment.searchItem(newText);
 
-                }else if(fragName.equals("Archive")){
+                } else if (fragName.equals("Archive")) {
 
                     ArchiveFragment.searchItem(newText);
 
-                }else if(fragName.equals("Trash")){
+                } else if (fragName.equals("Trash")) {
 
                     TrashFragment.searchItem(newText);
 
@@ -159,7 +170,44 @@ public class MainPanelActivity extends AppCompatActivity {
 
         displaySelectedFragment(R.id.userNotes);
 
+        isPicEdit();
+    }
 
+    private void isPicEdit() {
+        if (isPicEditable == true) {
+            user_Pic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
+                }
+            });
+        }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_IMAGE) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data != null) {
+                    userPic = data.getData();
+
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+
+                        user_Pic.setImageBitmap(bitmap);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void showUserInfo() {
@@ -168,10 +216,77 @@ public class MainPanelActivity extends AppCompatActivity {
         userEmail = user.getEmail();
         userPic = user.getPhotoUrl();
 
-        user_Name.setText(userName);
+        user_Pic.setImageURI(userPic);
+
+        if (userName == null) {
+
+            String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userID);
+
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    UserData data = dataSnapshot.getValue(UserData.class);
+
+                    String mFirst = data.getFirst();
+                    String mLast = data.getLast();
+
+                    userName = mFirst + " " + mLast;
+
+                    user_Name.setText(userName);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            isPicEditable = true;
+
+        } else if (userName.equals("")) {
+
+            String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userID);
+
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    UserData data = dataSnapshot.getValue(UserData.class);
+
+                    String mFirst = data.getFirst();
+                    String mLast = data.getLast();
+
+                    userName = mFirst + " " + mLast;
+
+                    user_Name.setText(userName);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            isPicEditable = true;
+        } else {
+
+            user_Name.setText(userName);
+
+            isPicEditable = false;
+
+        }
         user_Email.setText(userEmail);
 
-        if (!userPic.equals(null)) {
+        if (user_Pic.getDrawable() != null) {
+
+            user_Pic.setImageResource(R.mipmap.ic_launcher);
+
+        } else {
             Glide.with(getApplicationContext())
                     .load(userPic.toString())
                     .into(user_Pic);
@@ -208,7 +323,8 @@ public class MainPanelActivity extends AppCompatActivity {
             progress.setMessage("Loging Out");
             progress.show();
             mAuth.signOut();
-            
+            LoginManager.getInstance().logOut();
+
             Intent i = new Intent(getApplicationContext(), LoginActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             progress.dismiss();
@@ -238,7 +354,7 @@ public class MainPanelActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId() == R.id.layoutManager) {
+        if (item.getItemId() == R.id.layoutManager) {
 
             if (fragName.equals("Note"))
                 NoteFragment.onItemSelected(item);

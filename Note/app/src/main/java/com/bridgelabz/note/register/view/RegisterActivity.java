@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.base.BaseActivity;
 import com.bridgelabz.note.constant.Constant;
+import com.bridgelabz.note.login.view.LoginActivity;
 import com.bridgelabz.note.register.presenter.RegisterUserData;
 import com.bridgelabz.note.view.MainPanelActivity;
 
@@ -67,10 +68,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
 
             case R.id.signRegister:
 
-                Intent i = new Intent(this, MainPanelActivity.class);
                 if(isValid()) {
                     presenter.getData(First, Last, email, phone, pass);
-                    startActivity(i);
                 }
                 else {
                     Toast.makeText(this, Constant.enter_correct_data, Toast.LENGTH_SHORT).show();
@@ -125,7 +124,9 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void registerSuccesful(String message) {
+        Intent i = new Intent(this, MainPanelActivity.class);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        startActivity(i);
     }
 
     @Override
