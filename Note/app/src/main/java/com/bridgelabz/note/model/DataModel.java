@@ -1,5 +1,7 @@
 package com.bridgelabz.note.model;
 
+import android.support.v7.widget.RecyclerView;
+
 public class DataModel {
 
     private String Title;
@@ -12,7 +14,6 @@ public class DataModel {
     private boolean Reminder;
     private String reminderdate;
     private String remindertime;
-
 
     public DataModel() {
     }

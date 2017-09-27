@@ -1,5 +1,7 @@
 package com.bridgelabz.note.model;
 
+import android.support.v7.widget.RecyclerView;
+
 import java.util.ArrayList;
 
 public class UserData extends ArrayList<UserData> {
@@ -7,14 +9,18 @@ public class UserData extends ArrayList<UserData> {
     private String First;
     private String Last;
     private String Phone;
+    private String Pic;
+    private String Layout;
 
     public UserData() {
     }
 
-    public UserData(String first, String last, String phone) {
+    public UserData(String first, String last, String phone, String pic,String layout) {
         First = first;
         Last = last;
         Phone = phone;
+        Pic = pic;
+        Layout = layout;
     }
 
     public String getFirst() {
@@ -39,5 +45,21 @@ public class UserData extends ArrayList<UserData> {
 
     public void setPhone(String phone) {
         Phone = phone;
+    }
+
+    public String getPic() {
+        return Pic;
+    }
+
+    public void setPic(String pic) {
+        Pic = pic;
+    }
+
+    public String getLayout() {
+        return Layout;
+    }
+
+    public void setLayout(String layout) {
+        Layout = layout;
     }
 }

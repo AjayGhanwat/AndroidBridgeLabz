@@ -156,10 +156,14 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
         reference = FirebaseDatabase.getInstance().getReference().child("Data").child(userID).child(date).child(id);
 
-        if(dire.equals("Left"))
+        if(dire.equals("Left")) {
             reference.child("archive").setValue(false);
-        else
+            dataAdapter.notifyDataSetChanged();
+        }
+        else {
             reference.child("trash").setValue(false);
+            dataAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

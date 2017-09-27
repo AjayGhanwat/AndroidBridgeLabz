@@ -2,6 +2,8 @@ package com.bridgelabz.note.register.interacter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.bridgelabz.note.constant.Constant;
 import com.bridgelabz.note.register.presenter.RegisterUserData;
@@ -46,9 +48,12 @@ public class RegisterUser implements RegisterUserInterface {
                             String userId = mAuth.getCurrentUser().getUid();
                             DatabaseReference currentUser = reference.child("Users").child(userId);
 
+                            String linearLayoutManager = "linearLayoutManager";
+
                             currentUser.child(Constant.firebase_database_key_first).setValue(first);
                             currentUser.child(Constant.firebase_database_key_last).setValue(last);
                             currentUser.child(Constant.firebase_database_key_phone).setValue(phone);
+                            currentUser.child("Layout").setValue(linearLayoutManager);
 
                             registerUserData.registerSucces(Constant.login_success);
                             registerUserData.hideProgressDialog();

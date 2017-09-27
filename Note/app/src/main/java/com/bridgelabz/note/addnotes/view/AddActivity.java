@@ -25,6 +25,7 @@ import com.kizitonwose.colorpreference.ColorShape;
 
 import java.util.Calendar;
 
+import static android.R.attr.x;
 import static com.bridgelabz.note.R.array.colorArray;
 
 public class AddActivity extends BaseActivity implements AddNotesInterface, ColorDialog.OnColorSelectedListener {
@@ -94,10 +95,48 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
         if (scheduleClient != null)
             scheduleClient.doUnbindService();
 
+        getDataStored();
+
         onBackPressed();
 
         return true;
     }
+
+    private void getDataStored() {
+
+        String ReminderDate = "null";
+        String ReminderTime = "null";
+        boolean reminder = false;
+
+        if (mYear != 0 && mMonth != 0 && mDay!= 0) {
+            Calendar c = Calendar.getInstance();
+            c.set(mYear, mMonth -1, mDay);
+            c.set(Calendar.HOUR_OF_DAY, hour_x);
+            c.set(Calendar.MINUTE, minute_x);
+            c.set(Calendar.SECOND, 0);
+
+            scheduleClient.setAlarmForNotification(c);
+
+            String mMonth;
+
+            reminder = true;
+
+            if (month_x < 10 && month_x != 0 ) {
+                mMonth = "0" + month_x;
+            } else {
+                mMonth = month_x + "";
+            }
+
+            ReminderDate = year_x + "-" + mMonth + "-" + day_x;
+
+            ReminderTime = hour_x + "-" + minute_x;
+
+            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
+        } else {
+            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,7 +174,7 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
                 reminder = true;
 
-                if (month_x < 10) {
+                if (month_x < 10 && month_x != 0) {
                     mMonth = "0" + month_x;
                 } else {
                     mMonth = month_x + "";

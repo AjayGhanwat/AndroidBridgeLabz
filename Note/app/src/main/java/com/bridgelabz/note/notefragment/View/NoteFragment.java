@@ -6,12 +6,15 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.solver.widgets.Snapshot;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,12 +26,27 @@ import com.bridgelabz.note.R;
 import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.addnotes.view.AddActivity;
 import com.bridgelabz.note.base.BaseFragment;
+import com.bridgelabz.note.model.DataModel;
+import com.bridgelabz.note.model.UserData;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenter;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenterInterface;
 import com.bridgelabz.note.view.MainPanelActivity;
+import com.firebase.client.Firebase;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
+import java.util.ArrayList;
+
+import static android.R.attr.data;
+import static android.R.attr.listMenuViewStyle;
 import static android.R.interpolator.linear;
 import static com.bridgelabz.note.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.note.R.drawable.ic_view_quilt_black_24dp;
@@ -139,6 +157,9 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerNote);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
+
+        Log.i("Layout", " On Datachange : "+ layoutManager);
+
     }
 
     @Override

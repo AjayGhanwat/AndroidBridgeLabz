@@ -24,6 +24,7 @@ import com.kizitonwose.colorpreference.ColorShape;
 
 import java.util.Calendar;
 
+import static android.R.attr.id;
 import static com.bridgelabz.note.R.array.colorArray;
 
 public class EditNote extends BaseActivity implements EditNotesInterface, ColorDialog.OnColorSelectedListener{
@@ -92,16 +93,37 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
         super.onStart();
     }
 
-    @Override
     public boolean onSupportNavigateUp() {
 
         if (scheduleClient != null)
             scheduleClient.doUnbindService();
 
-        onBackPressed();
+        getDataStored();
 
         onBackPressed();
         return true;
+    }
+
+    private void getDataStored() {
+        String mMonth;
+
+        if(month_x < 10 && minute_x != 0) {
+            mMonth = "0" + month_x;
+        }else {
+            mMonth = month_x + "";
+        }
+
+        user_reminder_date = year_x + "-" + mMonth + "-" + day_x;
+
+        user_reminder_time = hour_x + "-" + minute_x;
+
+        if(user_reminder_date.equals("0-0-0")){
+            user_reminder = false;
+        }else{
+            user_reminder = true;
+        }
+
+        presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder,user_reminder_date, user_reminder_time);
     }
 
     @Override

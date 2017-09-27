@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,16 +35,24 @@ import com.bridgelabz.note.reminderfragment.view.ReminderFragment;
 import com.bridgelabz.note.trashfragment.view.TrashFragment;
 import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.io.IOException;
+
+import static android.R.attr.data;
 
 public class MainPanelActivity extends AppCompatActivity {
 
@@ -62,12 +72,25 @@ public class MainPanelActivity extends AppCompatActivity {
     boolean isPicEditable = false;
     int SELECT_IMAGE;
 
+    StorageReference storageRef ;
+
+    String picUri;
+    String userID;
+
+    Uri downloadUri;
+    DatabaseReference mRefImage;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_panel);
 
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        mRefImage = FirebaseDatabase.getInstance().getReference().child("Users").child(userID);
+
+        storageRef = FirebaseStorage.getInstance().getReference();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -192,14 +215,27 @@ public class MainPanelActivity extends AppCompatActivity {
         if (requestCode == SELECT_IMAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 if (data != null) {
-                    userPic = data.getData();
+
+                    Uri uri = data.getData();
 
                     try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
 
-                        user_Pic.setImageBitmap(bitmap);
+                        StorageReference mRef = storageRef.child("Pic").child(userID);
 
-                    } catch (IOException e) {
+                        mRef.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                downloadUri = taskSnapshot.getDownloadUrl();
+
+                                Glide.with(getApplicationContext()).load(downloadUri).into(user_Pic);
+
+                                mRefImage.child("Pic").setValue(downloadUri.toString());
+
+                            }
+                        });
+
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -209,6 +245,8 @@ public class MainPanelActivity extends AppCompatActivity {
             }
         }
     }
+
+    String download;
 
     private void showUserInfo() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -251,6 +289,7 @@ public class MainPanelActivity extends AppCompatActivity {
             String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userID);
+            reference.keepSynced(true);
 
             reference.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -284,8 +323,31 @@ public class MainPanelActivity extends AppCompatActivity {
 
         if (user_Pic.getDrawable() != null) {
 
-            user_Pic.setImageResource(R.mipmap.ic_launcher);
+            DatabaseReference batabase = FirebaseDatabase.getInstance().getReference().child("Users").child(userID);
+            batabase.keepSynced(true);
 
+            batabase.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    UserData userData = dataSnapshot.getValue(UserData.class);
+
+                    download = userData.getPic();
+
+                    Log.i("Image", "onDataChange: "+download);
+
+                    if(download == null) {
+                        user_Pic.setImageResource(R.mipmap.ic_launcher);
+                    }else{
+                        Glide.with(getApplicationContext()).load(download).into(user_Pic);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         } else {
             Glide.with(getApplicationContext())
                     .load(userPic.toString())
