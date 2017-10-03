@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +27,8 @@ import java.util.Calendar;
 
 import static android.R.attr.id;
 import static com.bridgelabz.note.R.array.colorArray;
+import static com.bridgelabz.note.R.drawable.pin;
+import static com.bridgelabz.note.R.drawable.pinned;
 
 public class EditNote extends BaseActivity implements EditNotesInterface, ColorDialog.OnColorSelectedListener{
 
@@ -36,6 +39,8 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
     boolean user_reminder;
 
     String title,decs;
+
+    boolean isPinned;
 
     EditNotePresenter presenter;
 
@@ -73,6 +78,7 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
         user_reminder_date = extras.getString("reminderDate");
         user_reminder_time = extras.getString("reminderTime");
         user_reminder = extras.getBoolean("reminder");
+        isPinned = extras.getBoolean("pin");
 
         usertitle.setText(user_title);
         userdesc.setText(user_desc);
@@ -86,6 +92,7 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
 
         scheduleClient = new ScheduleClient(this);
         scheduleClient.doBindService();
+
     }
 
     @Override
@@ -123,7 +130,7 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
             user_reminder = true;
         }
 
-        presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder,user_reminder_date, user_reminder_time);
+        presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder,user_reminder_date, user_reminder_time, isPinned);
     }
 
     @Override
@@ -133,7 +140,19 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
 
         int id = item.getItemId();
 
-        if (id == R.id.alarmNote) {
+        if(id == R.id.pinNote){
+
+            if (!isPinned) {
+                isPinned = true;
+                item.setIcon(pinned);
+            }else{
+                isPinned = false;
+                item.setIcon(pin);
+            }
+
+            Toast.makeText(this, "Pinned Clicked", Toast.LENGTH_SHORT).show();
+
+        }else if (id == R.id.alarmNote) {
 
             showDateDialogPicker();
 
@@ -157,7 +176,7 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
                 user_reminder = true;
             }
 
-            presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder,user_reminder_date, user_reminder_time);
+            presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder,user_reminder_date, user_reminder_time,isPinned);
 
             onSupportNavigateUp();
 
@@ -181,6 +200,16 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.addnote, menu);
+
+        if(isPinned) {
+            if (menu != null) {
+                MenuItem item = menu.findItem(R.id.pinNote);
+                if (item != null) {
+                    item.setIcon(R.drawable.pinned);
+                }
+            }
+        }
+
         return true;
     }
 

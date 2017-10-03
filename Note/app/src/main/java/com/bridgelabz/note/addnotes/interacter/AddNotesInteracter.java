@@ -1,38 +1,32 @@
 package com.bridgelabz.note.addnotes.interacter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
-import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.note.addnotes.presenter.AddNotePresenterInterface;
+import com.bridgelabz.note.notefragment.interacter.NoteFragmentInteracter;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static android.R.attr.key;
-
-public class AddNotesInteracter implements AddNotesInteracterInterface{
+public class AddNotesInteracter implements AddNotesInteracterInterface {
 
     Context context;
     AddNotePresenterInterface presenter;
-
-    public AddNotesInteracter(Context context, AddNotePresenter presenter){
+    FirebaseAuth mAuth;
+    DatabaseReference reference;
+    public AddNotesInteracter(Context context, AddNotePresenter presenter) {
 
         this.context = context;
         this.presenter = presenter;
 
     }
 
-    FirebaseAuth mAuth;
-    DatabaseReference reference;
-
     @Override
-    public void addNoteReminderFirebaase(String title, String decs,int userColor,boolean reminder, String reminderDate, String reminderTime) {
+    public void addNoteReminderFirebaase(String title, String decs, int userColor, boolean reminder, String reminderDate, String reminderTime, boolean isPinned) {
 
         presenter.showProgresss("Adding Note");
 
@@ -42,15 +36,15 @@ public class AddNotesInteracter implements AddNotesInteracterInterface{
 
         String key1;
 
-        String previousDate = NoteDataAdapter.date;
+        String previousDate = NoteFragmentInteracter.userDate;
 
         Date cDate = new Date();
         String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
 
-        if(previousDate != null ) {
+        if (previousDate != null) {
             if (previousDate.equals(fDate)) {
-                if (NoteDataAdapter.key != null) {
-                    String id = NoteDataAdapter.key;
+                if (NoteFragmentInteracter.Key != null) {
+                    String id = NoteFragmentInteracter.Key;
 
                     int key = Integer.parseInt(id);
                     key++;
@@ -59,9 +53,9 @@ public class AddNotesInteracter implements AddNotesInteracterInterface{
                 } else {
                     key1 = "0";
                 }
-            } else{
+            } else {
 
-                if (NoteDataAdapter.key != null) {
+                if (NoteFragmentInteracter.Key != null) {
                     int key = -1;
                     key++;
 
@@ -73,7 +67,7 @@ public class AddNotesInteracter implements AddNotesInteracterInterface{
                     key1 = "0";
                 }
             }
-        }else{
+        } else {
             previousDate = fDate;
             key1 = "0";
         }
@@ -90,6 +84,7 @@ public class AddNotesInteracter implements AddNotesInteracterInterface{
         reference.child("reminderdate").setValue(reminderDate);
         reference.child("remindertime").setValue(reminderTime);
         reference.child("reminder").setValue(reminder);
+        reference.child("pin").setValue(isPinned);
 
         presenter.addNoteSuccess("Success");
         presenter.dismissProgress();

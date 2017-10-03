@@ -8,6 +8,7 @@ import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +28,9 @@ import java.util.Calendar;
 
 import static android.R.attr.x;
 import static com.bridgelabz.note.R.array.colorArray;
+import static com.bridgelabz.note.R.drawable.ic_view_quilt_black_24dp;
+import static com.bridgelabz.note.R.drawable.pin;
+import static com.bridgelabz.note.R.drawable.pinned;
 
 public class AddActivity extends BaseActivity implements AddNotesInterface, ColorDialog.OnColorSelectedListener {
 
@@ -34,6 +38,8 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
     public static String title;
     public static String decs;
+
+    boolean isPinned = false;
 
     AddNotePresenter presenter;
     ProgressDialog progress;
@@ -92,9 +98,6 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
     @Override
     public boolean onSupportNavigateUp() {
 
-        if (scheduleClient != null)
-            scheduleClient.doUnbindService();
-
         getDataStored();
 
         onBackPressed();
@@ -131,9 +134,11 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
             ReminderTime = hour_x + "-" + minute_x;
 
-            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
+            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
         } else {
-            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
+            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
+            if (scheduleClient != null)
+                scheduleClient.doUnbindService();
         }
     }
 
@@ -155,7 +160,19 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
         int id = item.getItemId();
 
-        if (id == R.id.alarmNote) {
+        if(id == R.id.pinNote){
+
+            if (!isPinned) {
+                isPinned = true;
+                item.setIcon(pinned);
+            }else{
+                isPinned = false;
+                item.setIcon(pin);
+            }
+
+            Toast.makeText(this, "Pinned Clicked", Toast.LENGTH_SHORT).show();
+
+        }else if (id == R.id.alarmNote) {
 
             showDateDialogPicker();
 
@@ -184,11 +201,13 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
                 ReminderTime = hour_x + "-" + minute_x;
 
-                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
+                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
             } else {
-                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime);
+                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
+                if (scheduleClient != null)
+                    scheduleClient.doUnbindService();
             }
-            onSupportNavigateUp();
+            onBackPressed();
 
         } else if (id == R.id.colorNote) {
             new ColorDialog.Builder(this)

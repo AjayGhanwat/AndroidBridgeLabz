@@ -53,6 +53,7 @@ import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import java.io.IOException;
 
 import static android.R.attr.data;
+import static android.R.attr.indeterminateTintMode;
 
 public class MainPanelActivity extends AppCompatActivity {
 
@@ -79,6 +80,8 @@ public class MainPanelActivity extends AppCompatActivity {
 
     Uri downloadUri;
     DatabaseReference mRefImage;
+
+    public static int changetoolbarItem = 0;
 
 
     @Override
@@ -319,6 +322,7 @@ public class MainPanelActivity extends AppCompatActivity {
             isPicEditable = false;
 
         }
+
         user_Email.setText(userEmail);
 
         if (user_Pic.getDrawable() != null) {
@@ -405,10 +409,15 @@ public class MainPanelActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.main_panel_menu, menu);
+        if(changetoolbarItem == 0) {
 
-        MenuItem item = menu.findItem(R.id.search);
-        materialSearchView.setMenuItem(item);
+            getMenuInflater().inflate(R.menu.main_panel_menu, menu);
+
+            MenuItem item = menu.findItem(R.id.search);
+            materialSearchView.setMenuItem(item);
+
+        }else
+            getMenuInflater().inflate(R.menu.onlognpressed, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -418,14 +427,18 @@ public class MainPanelActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.layoutManager) {
 
-            if (fragName.equals("Note"))
+            if (fragName.equals("Note")){
                 NoteFragment.onItemSelected(item);
-            else if (fragName.equals("Reminder"))
+            }
+            else if (fragName.equals("Reminder")){
                 ReminderFragment.onItemSelected(item);
-            else if (fragName.equals("Archive"))
+            }
+            else if (fragName.equals("Archive")){
                 ArchiveFragment.onItemSelected(item);
-            else if (fragName.equals("Trash"))
+            }
+            else if (fragName.equals("Trash")){
                 TrashFragment.onItemSelected(item);
+            }
 
         }
 

@@ -6,14 +6,11 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.constraint.solver.widgets.Snapshot;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -23,45 +20,36 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bridgelabz.note.R;
-import com.bridgelabz.note.adapter.NoteDataAdapter;
 import com.bridgelabz.note.addnotes.view.AddActivity;
 import com.bridgelabz.note.base.BaseFragment;
-import com.bridgelabz.note.model.DataModel;
 import com.bridgelabz.note.model.UserData;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenter;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenterInterface;
-import com.bridgelabz.note.view.MainPanelActivity;
-import com.firebase.client.Firebase;
-import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
-import java.util.ArrayList;
-
-import static android.R.attr.data;
-import static android.R.attr.listMenuViewStyle;
-import static android.R.interpolator.linear;
 import static com.bridgelabz.note.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.note.R.drawable.ic_view_quilt_black_24dp;
 
 public class NoteFragment extends BaseFragment implements NoteFragmentInterface {
 
     View v;
-    static RecyclerView recyclerView;
+    public static RecyclerView recyclerView;
     ProgressDialog progress;
+
+    static DatabaseReference reference;
 
     static LinearLayoutManager linearLayoutManager;
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
 
     RelativeLayout relativeLayout;
+
+    String layout;
 
     static NoteFragmentPresenterInterface presenter;
 
@@ -78,12 +66,38 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
         this.v = view;
 
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+               // for(DataSnapshot post : dataSnapshot.getChildren()){
+
+                    UserData user = dataSnapshot.getValue(UserData.class);
+
+                    layout = user.getLayout();
+
+                    isLayout();
+
+              //  }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         relativeLayout = (RelativeLayout) v.findViewById(R.id.relativeLayoutManager);
 
         linearLayoutManager = new LinearLayoutManager(getContext());
         gridLayoutManager = new StaggeredGridLayoutManager(2, 1);
 
-        layoutManager = linearLayoutManager;
+       // layoutManager = linearLayoutManager;
 
         initView();
         clickListning();
@@ -96,6 +110,22 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
                 startActivity(intent);
             }
         });
+    }
+
+    private void isLayout() {
+        if(layout.equals("linear")) {
+            layoutManager = linearLayoutManager;
+            recyclerView.setLayoutManager(layoutManager);
+        }else{
+            layoutManager = gridLayoutManager;
+            recyclerView.setLayoutManager(layoutManager);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isLayout();
     }
 
     @Override
@@ -134,7 +164,7 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
     @Override
     public void viewSnacBar(String msg) {
         Snackbar snackbar = Snackbar
-                .make(relativeLayout, msg, Snackbar.LENGTH_LONG)
+                .make(relativeLayout, msg, Snackbar.LENGTH_SHORT)
                 .setAction("UNDO", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -156,7 +186,6 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerNote);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(layoutManager);
 
         Log.i("Layout", " On Datachange : "+ layoutManager);
 
@@ -174,10 +203,12 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
             if (!linearLayoutManager.equals(layoutManager)) {
                 layoutManager = linearLayoutManager;
                 item.setIcon(ic_view_quilt_black_24dp);
+                reference.child("layout").setValue("linear");
                 recyclerView.setLayoutManager(layoutManager);
             } else if (linearLayoutManager.equals(layoutManager)) {
                 layoutManager = gridLayoutManager;
                 item.setIcon(ic_view_list_black_24dp);
+                reference.child("layout").setValue("grid");
                 recyclerView.setLayoutManager(layoutManager);
             }
         }
@@ -193,4 +224,5 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
     public static void resetRecyclerView() {
         presenter.resetNoteRecycler(recyclerView);
     }
+
 }

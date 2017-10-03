@@ -17,7 +17,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
@@ -36,6 +38,9 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
     String id,date;
     DatabaseReference reference;
+
+    public static String Key;
+    public static String userDate;
 
     @Override
     public void showRecyclerData(final RecyclerView recyclerView) {
@@ -57,6 +62,24 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
                     DataModel match = postSnapshot.getValue(DataModel.class);
 
+                    boolean is = match.getPin();
+                    Log.i("Pinned", "onChildAdded: " + is);
+
+                    if(match.getKey() == null && match.getDate() == null) {
+                        Date cDate = new Date();
+
+                        String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
+                        Key = "0";
+                        Log.i("DataIs", "onChildAdded: " + Key);
+                        userDate = fDate;
+                        Log.i("DataIs", "onChildAdded: " + userDate);
+                    }else{
+                        Key = match.getKey();
+                        Log.i("DataIs", "onChildAdded: " + Key);
+                        userDate = match.getDate();
+                        Log.i("DataIs", "onChildAdded: " + userDate);
+                    }
+
                     boolean isArchive = match.getArchive();
 
                     if(!isArchive && !match.getTrash()) {
@@ -77,7 +100,24 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
 
+                    DataModel match = postSnapshot.getValue(DataModel.class);
+
+                    if(dataAdapter.getItemCount() != -1) {
+                        Key = match.getKey();
+                        Log.i("DataIs", "onChildAdded: " + Key);
+                        userDate = match.getDate();
+                        Log.i("DataIs", "onChildAdded: " + userDate);
+                    }else{
+                        Date cDate = new Date();
+                        String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
+                        Key = "0";
+                        Log.i("DataIs", "onChildAdded: " + Key);
+                        userDate = fDate;
+                        Log.i("DataIs", "onChildAdded: " + userDate);
+                    }
+                }
             }
 
             @Override
@@ -93,6 +133,7 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
     }
 
     String dire;
+    boolean isPin;
 
     @Override
     public void swappableData(RecyclerView recyclerView) {
@@ -115,14 +156,21 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
                                     id = data.get(position).getKey();
                                     date = data.get(position).getDate();
-                                    changeDataArchive(id,date);
+                                    isPin = data.get(position).getPin();
+                                    changeDataArchive(id,date,isPin);
                                     dire = "Left";
                                     dataAdapter = new NoteDataAdapter(data);
                                     recyclerView.setAdapter(dataAdapter);
                                     dataAdapter.notifyDataSetChanged();
                                     data.remove(position);
                                     dataAdapter.notifyItemRemoved(position);
-                                    noteInterface.showSnacBar("Note Archive!");
+                                    if(isPin){
+                                        noteInterface.showSnacBar("Note Archive & Unpinned!");
+                                        dire = "LeftUn";
+                                    }
+                                    else {
+                                        noteInterface.showSnacBar("Note Archive!");
+                                    }
                                 }
                                 dataAdapter.notifyDataSetChanged();
                             }
@@ -133,14 +181,21 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
 
                                     id = data.get(position).getKey();
                                     date = data.get(position).getDate();
-                                    changeDataTrash(id,date);
+                                    isPin = data.get(position).getPin();
+                                    changeDataTrash(id,date,isPin);
                                     dire = "Right";
                                     dataAdapter = new NoteDataAdapter(data);
                                     recyclerView.setAdapter(dataAdapter);
                                     dataAdapter.notifyDataSetChanged();
                                     data.remove(position);
                                     dataAdapter.notifyItemRemoved(position);
-                                    noteInterface.showSnacBar("Note Trashed!");
+                                    if(isPin){
+                                        noteInterface.showSnacBar("Note Trashed & Unpinned!");
+                                        dire = "RightUn";
+                                    }
+                                    else {
+                                        noteInterface.showSnacBar("Note Trashed!");
+                                    }
                                 }
                                 dataAdapter.notifyDataSetChanged();
                             }
@@ -159,8 +214,15 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
         if(dire.equals("Left")) {
             reference.child("archive").setValue(false);
             dataAdapter.notifyDataSetChanged();
-        }
-        else {
+        }else if(dire.equals("LeftUn")){
+            reference.child("archive").setValue(false);
+            reference.child("pin").setValue(true);
+            dataAdapter.notifyDataSetChanged();
+        }else if(dire.equals("RightUn")){
+            reference.child("trash").setValue(false);
+            reference.child("pin").setValue(true);
+            dataAdapter.notifyDataSetChanged();
+        }else {
             reference.child("trash").setValue(false);
             dataAdapter.notifyDataSetChanged();
         }
@@ -191,23 +253,34 @@ public class NoteFragmentInteracter implements NoteFragmentInteracterInterface {
         recyclerView.setAdapter(dataAdapter);
     }
 
-    void changeDataArchive(final String id,String date){
+    void changeDataArchive(final String id,String date, boolean isPin){
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         reference = FirebaseDatabase.getInstance().getReference().child("Data").child(userID).child(date).child(id);
 
-        reference.child("archive").setValue(true);
+        if(!isPin) {
+            reference.child("archive").setValue(true);
+        }else{
+            reference.child("archive").setValue(true);
+            reference.child("pin").setValue(false);
+        }
+
 
     }
 
-    void changeDataTrash(final String id,String date){
+    void changeDataTrash(final String id,String date, boolean isPin){
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         reference = FirebaseDatabase.getInstance().getReference().child("Data").child(userID).child(date).child(id);
 
-        reference.child("trash").setValue(true);
+        if (!isPin) {
+            reference.child("trash").setValue(true);
+        }else{
+            reference.child("trash").setValue(true);
+            reference.child("pin").setValue(false);
+        }
 
     }
 }

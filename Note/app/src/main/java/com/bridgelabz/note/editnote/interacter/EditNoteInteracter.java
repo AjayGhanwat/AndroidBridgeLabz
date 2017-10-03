@@ -35,7 +35,7 @@ public class EditNoteInteracter implements EditNoteInteracterInterface {
     DatabaseReference reference;
 
     @Override
-    public void editNotes(String title, String decs, String user_date, int user_color, String user_key, boolean user_reminder, String user_reminder_date, String user_reminder_time) {
+    public void editNotes(String title, String decs, String user_date, int user_color, String user_key, boolean user_reminder, String user_reminder_date, String user_reminder_time, boolean isPinned) {
 
         presenter.showProgresss("Editing Note");
 
@@ -53,6 +53,7 @@ public class EditNoteInteracter implements EditNoteInteracterInterface {
         reference.child("reminder").setValue(user_reminder);
         reference.child("reminderdate").setValue(user_reminder_date);
         reference.child("remindertime").setValue(user_reminder_time);
+        reference.child("pin").setValue(isPinned);
 
         if(user_reminder){
 

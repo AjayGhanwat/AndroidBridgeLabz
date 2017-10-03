@@ -10,6 +10,7 @@ import com.bridgelabz.note.model.DataModel;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenter;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenterInterface;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
+import com.google.android.gms.common.data.DataBuffer;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -119,7 +120,7 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
                                     id = data.get(position).getKey();
                                     date = data.get(position).getDate();
-                                    changeDataDelete(id, date, recyclerView);
+                                    changeDataDeleted(id, date);
                                     dataAdapter = new TrashDataAdapter(data);
                                     recyclerView.setAdapter(dataAdapter);
                                     dataAdapter.notifyDataSetChanged();
@@ -172,53 +173,24 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
     }
 
-    @Override
+   @Override
     public void refreshrecycler(RecyclerView recyclerView) {
         recyclerView.setAdapter(dataAdapter);
     }
 
-
+    String givenID;
+    String nextID;
     boolean isDeleted = false;
-    String mId;
-    String user_ID;
 
-    private void changeDataDelete( final String id, final String date, final RecyclerView recyclerView) {
+     private void changeDataDeleted( final String id, final String date) {
 
-        user_ID = id;
-        reference.addChildEventListener(new ChildEventListener() {
+         givenID = id;
+
+         reference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                GenericTypeIndicator<ArrayList<DataModel>> t = new GenericTypeIndicator<ArrayList<DataModel>>() {
-                };
-
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-
-                    if(dataSnapshot.getKey().equals(date)) {
-                        DataModel match = postSnapshot.getValue(DataModel.class);
-
-                        if (isDeleted) {
-
-                            mId = match.getKey();
-                            match.setKey(user_ID);
-                            reference.child(date).child(user_ID).setValue(match);
-                            reference.child(date).child(mId).removeValue();
-                            user_ID = mId;
-
-                        }
-
-
-                        if (!isDeleted && match.getDate().equals(date)) {
-
-                            if (match.getKey().equals(id)) {
-
-                                reference.child(date).child(id).removeValue();
-                                isDeleted = true;
-                            }
-                        }
-
-                    }
-                }
+                reference.child(date).child(givenID).removeValue();
             }
 
             @Override

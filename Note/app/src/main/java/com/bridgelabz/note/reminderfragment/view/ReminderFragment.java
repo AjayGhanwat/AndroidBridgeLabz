@@ -21,10 +21,17 @@ import android.widget.Toast;
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.addnotes.view.AddActivity;
 import com.bridgelabz.note.base.BaseFragment;
+import com.bridgelabz.note.model.UserData;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenter;
 import com.bridgelabz.note.notefragment.presenter.NoteFragmentPresenterInterface;
 import com.bridgelabz.note.reminderfragment.presenter.ReminderFragmentPresenter;
 import com.bridgelabz.note.reminderfragment.presenter.ReminderFragmentPresenterInterface;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import static com.bridgelabz.note.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.note.R.drawable.ic_view_quilt_black_24dp;
@@ -35,6 +42,8 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
     static RecyclerView recyclerView;
     ProgressDialog progress;
 
+    static DatabaseReference reference;
+
     static LinearLayoutManager linearLayoutManager;
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
@@ -42,6 +51,8 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
     RelativeLayout relativeLayout;
 
     static ReminderFragmentPresenterInterface presenter;
+
+    String layout;
 
     @Nullable
     @Override
@@ -56,12 +67,38 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
 
         this.v = view;
 
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                // for(DataSnapshot post : dataSnapshot.getChildren()){
+
+                UserData user = dataSnapshot.getValue(UserData.class);
+
+                layout = user.getLayout();
+
+                isLayout();
+
+                //  }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         relativeLayout = (RelativeLayout) v.findViewById(R.id.relativeLayoutReminder);
 
         linearLayoutManager = new LinearLayoutManager(getContext());
         gridLayoutManager = new StaggeredGridLayoutManager(2, 1);
 
-        layoutManager = linearLayoutManager;
+       // layoutManager = linearLayoutManager;
 
         initView();
         clickListning();
@@ -77,6 +114,22 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
         });
     }
 
+    private void isLayout() {
+        if(layout.equals("linear")) {
+            layoutManager = linearLayoutManager;
+            recyclerView.setLayoutManager(layoutManager);
+        }else{
+            layoutManager = gridLayoutManager;
+            recyclerView.setLayoutManager(layoutManager);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isLayout();
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -90,7 +143,6 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerReminder);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(layoutManager);
     }
 
     @Override
@@ -129,10 +181,12 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
 
             if (!linearLayoutManager.equals(layoutManager)) {
                 layoutManager = linearLayoutManager;
+                reference.child("layout").setValue("linear");
                 item.setIcon(ic_view_quilt_black_24dp);
                 recyclerView.setLayoutManager(layoutManager);
             } else if (linearLayoutManager.equals(layoutManager)) {
                 layoutManager = gridLayoutManager;
+                reference.child("layout").setValue("grid");
                 item.setIcon(ic_view_list_black_24dp);
                 recyclerView.setLayoutManager(layoutManager);
             }

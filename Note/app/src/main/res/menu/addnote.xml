@@ -3,6 +3,12 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/pinNote"
+        android:icon="@drawable/pin"
+        android:title="Pin"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/alarmNote"
         android:icon="@drawable/alarmclock"
         android:title="Reminder"
@@ -19,6 +25,4 @@
         android:icon="@drawable/ic_save_black_24dp"
         android:title="Save"
         app:showAsAction="always"/>
-
-
 </menu>

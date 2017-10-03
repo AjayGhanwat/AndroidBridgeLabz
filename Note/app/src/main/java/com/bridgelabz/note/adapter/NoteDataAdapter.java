@@ -1,24 +1,28 @@
 package com.bridgelabz.note.adapter;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.editnote.view.EditNote;
 import com.bridgelabz.note.model.DataModel;
+import com.bridgelabz.note.notefragment.View.NoteFragment;
+import com.bridgelabz.note.view.MainPanelActivity;
 
 import java.util.ArrayList;
 
 public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userViewHolder>{
 
-    public static String key;
-    public static String date;
     private ArrayList<DataModel> list;
 
     public NoteDataAdapter(ArrayList<DataModel> list) {
@@ -32,20 +36,22 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
         return new userViewHolder(inflatedView);
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onBindViewHolder(NoteDataAdapter.userViewHolder holder, int position) {
 
         int color;
 
-        key = list.get(position).getKey();
         color = list.get(position).getColor();
-        date = list.get(position).getDate();
 
         String hexColor = String.format("#%06X", (0xFFFFFF & color));
 
         holder.user_Title.setText(list.get(position).getTitle());
         holder.user_desc.setText(list.get(position).getDesc());
         holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
+        if(list.get(position).getPin()) {
+            holder.imageView.setImageResource(R.drawable.pinned);
+        }
     }
 
     @Override
@@ -56,6 +62,7 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
     public class userViewHolder extends RecyclerView.ViewHolder{
         TextView user_Title;
         TextView user_desc;
+        ImageView imageView;
 
         CardView card;
 
@@ -63,6 +70,7 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
             super(itemView);
             user_Title = (TextView) itemView.findViewById(R.id.titleTextView);
             user_desc = (TextView) itemView.findViewById(R.id.descTextView);
+            imageView = (ImageView) itemView.findViewById(R.id.importantPin);
             card = (CardView) itemView.findViewById(R.id.cardView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -77,6 +85,7 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
                     boolean user_reminder = list.get(getAdapterPosition()).getReminder();
                     String user_reminder_date = list.get(getAdapterPosition()).getReminderDate();
                     String user_reminder_time = list.get(getAdapterPosition()).getReminderTime();
+                    boolean user_pin = list.get(getAdapterPosition()).getPin();
 
                     Intent intent = new Intent(itemView.getContext(),EditNote.class);
                     intent.putExtra("Title", user_title);
@@ -87,10 +96,22 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
                     intent.putExtra("reminderDate", user_reminder_date);
                     intent.putExtra("reminderTime", user_reminder_time);
                     intent.putExtra("reminder", user_reminder);
+                    intent.putExtra("pin", user_pin);
                     itemView.getContext().startActivity(intent);
 
                 }
             });
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+
+                    Toast.makeText(itemView.getContext(), list.get(getAdapterPosition()).getTitle(), Toast.LENGTH_SHORT).show();
+
+                    return true;
+                }
+            });
+
         }
     }
 }

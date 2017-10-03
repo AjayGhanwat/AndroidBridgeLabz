@@ -43,6 +43,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.net.InetAddress;
 
@@ -229,6 +231,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+                            reference.child("layout").setValue("linear");
                             progressDismiss();
                         } else {
                             progressDismiss();
@@ -310,6 +315,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
+                            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+                            reference.child("layout").setValue("linear");
                             Intent i = new Intent(LoginActivity.this, MainPanelActivity.class);
                             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(i);

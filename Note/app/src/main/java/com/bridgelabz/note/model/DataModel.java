@@ -1,7 +1,5 @@
 package com.bridgelabz.note.model;
 
-import android.support.v7.widget.RecyclerView;
-
 public class DataModel {
 
     private String Title;
@@ -9,27 +7,33 @@ public class DataModel {
     private String Key;
     private int Color;
     private String Date;
+    private String Time;
     private boolean Archive;
     private boolean Trash;
     private boolean Reminder;
     private String reminderdate;
     private String remindertime;
+    private String Userid;
+    private boolean pin;
+
 
     public DataModel() {
     }
 
-    public DataModel(String title, String desc, String key, int color, String date, boolean archive,boolean trash, boolean reminder, String reminderDate, String reminderTime) {
+    public DataModel(String title, String desc, String key, int color, String date, String time, boolean archive, boolean trash, boolean reminder, String reminderDate, String reminderTime, String userid, boolean Pin) {
         Title = title;
         Desc = desc;
         Key = key;
         Color = color;
         Date = date;
+        Time = time;
         Archive = archive;
         Trash = trash;
         Reminder = reminder;
         reminderdate = reminderDate;
         remindertime = reminderTime;
-
+        Userid = userid;
+        pin = Pin;
     }
 
     public String getTitle() {
@@ -72,6 +76,14 @@ public class DataModel {
         Date = date;
     }
 
+    public String getTime() {
+        return Time;
+    }
+
+    public void setTime(String time) {
+        Time = time;
+    }
+
     public boolean getArchive() {
         return Archive;
     }
@@ -110,5 +122,21 @@ public class DataModel {
 
     public void setReminderTime(String reminderTime) {
         this.remindertime = reminderTime;
+    }
+
+    public String getUserid() {
+        return Userid;
+    }
+
+    public void setUserid(String userid) {
+        Userid = userid;
+    }
+
+    public boolean getPin() {
+        return pin;
+    }
+
+    public void setPin(boolean pin) {
+        this.pin = pin;
     }
 }

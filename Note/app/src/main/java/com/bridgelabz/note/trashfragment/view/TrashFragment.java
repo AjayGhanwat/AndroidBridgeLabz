@@ -20,8 +20,15 @@ import android.widget.Toast;
 import com.bridgelabz.note.R;
 import com.bridgelabz.note.archivefragment.presenter.ArchiveFragmentPresenter;
 import com.bridgelabz.note.base.BaseFragment;
+import com.bridgelabz.note.model.UserData;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenter;
 import com.bridgelabz.note.trashfragment.presenter.TrashFragmentPresenterInterface;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import static com.bridgelabz.note.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.note.R.drawable.ic_view_quilt_black_24dp;
@@ -35,11 +42,15 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
 
     ProgressDialog progress;
 
+    static DatabaseReference reference;
+
     static LinearLayoutManager linearLayoutManager;
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
 
     static TrashFragmentPresenterInterface presenter;
+
+    String layout;
 
     @Nullable
     @Override
@@ -54,15 +65,57 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
 
         this.v = view;
 
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        reference = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                // for(DataSnapshot post : dataSnapshot.getChildren()){
+
+                UserData user = dataSnapshot.getValue(UserData.class);
+
+                layout = user.getLayout();
+
+                isLayout();
+
+                //  }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         relativeLayout = (RelativeLayout) v.findViewById(R.id.relativeLayoutTrash);
 
         linearLayoutManager = new LinearLayoutManager(getContext());
         gridLayoutManager = new StaggeredGridLayoutManager(2, 1);
 
-        layoutManager = linearLayoutManager;
+        //layoutManager = linearLayoutManager;
 
         initView();
         clickListning();
+    }
+
+    private void isLayout() {
+        if(layout.equals("linear")) {
+            layoutManager = linearLayoutManager;
+            recyclerView.setLayoutManager(layoutManager);
+        }else{
+            layoutManager = gridLayoutManager;
+            recyclerView.setLayoutManager(layoutManager);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isLayout();
     }
 
     @Override
@@ -80,7 +133,6 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerTrash);
         recyclerView.setHasFixedSize(false);
-        recyclerView.setLayoutManager(layoutManager);
 
     }
 
@@ -125,10 +177,12 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
 
             if (!linearLayoutManager.equals(layoutManager)) {
                 layoutManager = linearLayoutManager;
+                reference.child("layout").setValue("linear");
                 item.setIcon(ic_view_quilt_black_24dp);
                 recyclerView.setLayoutManager(layoutManager);
             } else if (linearLayoutManager.equals(layoutManager)) {
                 layoutManager = gridLayoutManager;
+                reference.child("layout").setValue("grid");
                 item.setIcon(ic_view_list_black_24dp);
                 recyclerView.setLayoutManager(layoutManager);
             }
