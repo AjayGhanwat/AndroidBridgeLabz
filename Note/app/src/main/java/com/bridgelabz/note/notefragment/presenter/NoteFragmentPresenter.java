@@ -23,6 +23,11 @@ public class NoteFragmentPresenter implements NoteFragmentPresenterInterface{
     }
 
     @Override
+    public void showPinnedRecycler(RecyclerView recyclerView) {
+        interacterInterface.showPinnedRecyclerData(recyclerView);
+    }
+
+    @Override
     public void undoChange() {
         interacterInterface.undoChange();
     }
@@ -35,6 +40,11 @@ public class NoteFragmentPresenter implements NoteFragmentPresenterInterface{
     @Override
     public void resetNoteRecycler(RecyclerView recyclerView) {
         interacterInterface.resetRecycler(recyclerView);
+    }
+
+    @Override
+    public void resetNotePinRecycler(RecyclerView recyclerView) {
+        interacterInterface.resetPinRecycler(recyclerView);
     }
 
     @Override
@@ -65,5 +75,10 @@ public class NoteFragmentPresenter implements NoteFragmentPresenterInterface{
     @Override
     public void swappable(RecyclerView recyclerView) {
         interacterInterface.swappableData(recyclerView);
+    }
+
+    @Override
+    public void swappablePin(RecyclerView recyclerView) {
+        interacterInterface.swappablePinData(recyclerView);
     }
 }

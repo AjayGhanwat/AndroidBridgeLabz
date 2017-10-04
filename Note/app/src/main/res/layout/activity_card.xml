@@ -19,24 +19,21 @@
 
         <TextView
             android:id="@+id/titleTextView"
-            android:layout_width="313dp"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_margin="10dp"
-            android:fontFamily="serif"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_weight="0.53"/>
+            android:layout_weight="0.6"/>
 
         <ImageView
             android:id="@+id/importantPin"
-            android:layout_width="29dp"
-            android:layout_marginTop="10dp"
-            android:layout_height="26dp"
-            />
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            android:layout_weight="0.4"/>
 
     </LinearLayout>
-
-
 
     <TextView
         android:id="@+id/descTextView"

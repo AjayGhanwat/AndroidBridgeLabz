@@ -150,8 +150,6 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
                 item.setIcon(pin);
             }
 
-            Toast.makeText(this, "Pinned Clicked", Toast.LENGTH_SHORT).show();
-
         }else if (id == R.id.alarmNote) {
 
             showDateDialogPicker();

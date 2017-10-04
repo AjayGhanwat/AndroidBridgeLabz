@@ -170,8 +170,6 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
                 item.setIcon(pin);
             }
 
-            Toast.makeText(this, "Pinned Clicked", Toast.LENGTH_SHORT).show();
-
         }else if (id == R.id.alarmNote) {
 
             showDateDialogPicker();
