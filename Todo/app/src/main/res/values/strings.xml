@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Todo</string>
+    <string name="icon">Icon</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="register">Register</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="last_name">Last Name</string>
+    <string name="first_name">First Name</string>
+    <string name="Open">Open</string>
+    <string name="Close">Close</string>
+    <string name="pref_key">KEy</string>
+    <string name="facebook_app_id">527962410878294</string>
+    <string name="fb_login_protocol_scheme">fb527962410878294</string>
+
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/pinNote"
+        android:icon="@drawable/pin"
+        android:title="Pin"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/alarmNote"
+        android:icon="@drawable/alarmclock"
+        android:title="Reminder"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/colorNote"
+        android:icon="@drawable/ic_color_lens_black_24dp"
+        android:title="Color"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/saveNote"
+        android:icon="@drawable/ic_save_black_24dp"
+        android:title="Save"
+        app:showAsAction="always"/>
+</menu>

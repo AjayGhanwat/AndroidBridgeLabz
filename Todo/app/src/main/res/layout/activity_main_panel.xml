@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/drawerMainMenu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<RelativeLayout
+    android:id="@+id/userMain"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.bridgelabz.note.view.MainPanelActivity">
+
+    <include
+        layout="@layout/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.miguelcatalan.materialsearchview.MaterialSearchView
+        android:id="@+id/searchViewBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:searchSuggestionBackground="@color/colorPrimary"
+        app:searchCloseIcon="@drawable/ic_action_navigation_close_inverted"
+        app:searchBackIcon="@drawable/ic_action_navigation_arrow_back"
+        app:searchSuggestionIcon="@drawable/ic_suggestion"/>
+
+</RelativeLayout>
+
+    <android.support.design.widget.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/mainNavigationMenu"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/header"
+        app:menu="@menu/user_main_pannel">
+
+    </android.support.design.widget.NavigationView>
+
+</android.support.v4.widget.DrawerLayout>
