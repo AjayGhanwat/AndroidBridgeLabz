@@ -1,6 +1,7 @@
 package com.bridgelabz.todo.trashfragment.interacter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
@@ -9,11 +10,14 @@ import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.trashfragment.presenter.TrashFragmentPresenter;
 import com.bridgelabz.todo.trashfragment.presenter.TrashFragmentPresenterInterface;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -40,6 +44,7 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
     @Override
     public void showRecyclerData(final RecyclerView recyclerView) {
+
         data = new ArrayList<>();
 
         mAuth = FirebaseAuth.getInstance();
@@ -48,7 +53,7 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
 
         reference = FirebaseFirestore.getInstance().collection("Data").document(userId).collection("Notes");
 
-        reference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        reference.orderBy("key", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot documentSnapshots) {
 
@@ -67,8 +72,6 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
                         dataAdapter.notifyDataSetChanged();
                     }
                 }
-
-
             }
         });
     }
@@ -152,8 +155,67 @@ public class TrashFragmentInteracter implements TrashFragmentInteracterInterface
         recyclerView.setAdapter(dataAdapter);
     }
 
+    CollectionReference mRefDelete;
+    String deletedID;
+    boolean isDeleted = false;
+
     private void changeDataDeleted(final String id, final String date, RecyclerView recyclerView) {
 
+        mRefDelete = FirebaseFirestore.getInstance().collection("Data").document(userId).collection("Notes");
+
+        do {
+
+            if (deletedID == null) {
+                mRefDelete.document(id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                        if (task.isSuccessful()) {
+
+                            deletedID = task.getResult().getString("key");
+                            isDeleted = isDeletedNote(id);
+                        }
+
+                    }
+                });
+            }
+        }while (isDeleted == true);
+        isDeleted = false;
+    }
+
+    private boolean isDeletedNote(String id) {
+
+        mRefDelete.document(id).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+                mRefDelete.orderBy("key").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots) {
+
+                        for (DocumentSnapshot doc : documentSnapshots.getDocuments()) {
+
+                            DataModel getUserData = doc.toObject(DataModel.class);
+
+                            String updateKey = getUserData.getKey();
+                            String updateNote = getUserData.getId();
+
+                            int preID = Integer.parseInt(deletedID);
+                            int nextID = Integer.parseInt(updateKey);
+
+                            if (preID < nextID) {
+
+                                nextID--;
+
+                                mRefDelete.document(updateNote).update("key", String.valueOf(nextID));
+
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        return true;
     }
 
     void changeDataArchive(final String id, String date) {

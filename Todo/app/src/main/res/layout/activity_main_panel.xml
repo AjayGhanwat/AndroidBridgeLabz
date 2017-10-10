@@ -19,6 +19,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <include
+        layout="@layout/toolbar1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <com.miguelcatalan.materialsearchview.MaterialSearchView
         android:id="@+id/searchViewBar"
         android:layout_width="wrap_content"

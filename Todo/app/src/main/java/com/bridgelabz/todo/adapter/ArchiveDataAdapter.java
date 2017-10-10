@@ -41,9 +41,23 @@ public class ArchiveDataAdapter extends RecyclerView.Adapter<ArchiveDataAdapter.
 
         String hexColor = String.format("#%06X", (0xFFFFFF & color));
 
-        holder.user_Title.setText(list.get(position).getTitle());
-        holder.user_desc.setText(list.get(position).getDesc());
+        if(!list.get(position).getTitle().isEmpty()) {
+            holder.user_Title.setVisibility(View.VISIBLE);
+            holder.user_Title.setText(list.get(position).getTitle());
+        }else{
+            holder.user_Title.setVisibility(View.GONE);
+        }
+        if(!list.get(position).getDesc().isEmpty()) {
+            holder.user_desc.setVisibility(View.VISIBLE);
+            holder.user_desc.setText(list.get(position).getDesc());
+        }else{
+            holder.user_desc.setVisibility(View.GONE);
+        }
         holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
+
+//        holder.user_Title.setText(list.get(position).getTitle());
+//        holder.user_desc.setText(list.get(position).getDesc());
+//        holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
     }
 
     @Override

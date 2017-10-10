@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.bridgelabz.note.editnote.view.EditNote">
+    tools:context="com.bridgelabz.todo.editnote.view.EditNote">
 
     <include
         layout="@layout/toolbar"

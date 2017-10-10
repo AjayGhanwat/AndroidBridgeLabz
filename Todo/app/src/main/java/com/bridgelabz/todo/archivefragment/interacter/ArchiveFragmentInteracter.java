@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 //import com.google.firebase.database.ChildEventListener;
 //import com.google.firebase.database.DataSnapshot;
@@ -60,7 +61,7 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
 
         reference = FirebaseFirestore.getInstance().collection("Data").document(userId).collection("Notes");
 
-        reference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        reference.orderBy("key", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot documentSnapshots) {
 

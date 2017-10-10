@@ -15,7 +15,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "108228608989-nj6h986rl885328lklmt41ibp6iqsb01.apps.googleusercontent.com",
+          "client_id": "108228608989-f57nn5lmnme96mqof03s6nd3ap0eck9e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bridgelabz.todo",
+            "certificate_hash": "5a9ba70a1ac450a1ff0fddb9434befbb2c4e3ac5"
+          }
+        },
+        {
+          "client_id": "108228608989-3i5dklrun60a15s6tffujdmfqm7mf5f9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.bridgelabz.todo",

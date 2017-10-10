@@ -49,33 +49,23 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.bridgelabz.todo.constant.Constant.RC_SIGN_IN;
-
-public class LoginActivity extends BaseActivity implements View.OnClickListener, LoginActivityInterface{
-
-    Toolbar toolbar;
-
-    LoginUserPresenter presenter;
-
-    LoginButton loginButton;
-    CallbackManager cm;
-
-    FirebaseAuth mAuth;
-    FirebaseAuth.AuthStateListener mAuthStateListener;
-
-    String email,pass;
-
-    Button btn_Login, btn_Signup;
-    EditText mEmail_User, mPass_User;
-
-    SignInButton googleSign;
-
-    GoogleSignInOptions gso;
-    private GoogleApiClient mGoogleApiClient;
-
-    CollectionReference mRef;
+public class LoginActivity extends BaseActivity implements View.OnClickListener, LoginActivityInterface {
 
     public static boolean firebaseLogin = false;
+    Toolbar toolbar;
+    LoginUserPresenter presenter;
+    LoginButton loginButton;
+    CallbackManager cm;
+    FirebaseAuth mAuth;
+    FirebaseAuth.AuthStateListener mAuthStateListener;
+    String email, pass;
+    Button btn_Login, btn_Signup;
+    EditText mEmail_User, mPass_User;
+    SignInButton googleSign;
+    GoogleSignInOptions gso;
+    CollectionReference mRef;
+    ProgressDialog progress;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,10 +81,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         mAuth = FirebaseAuth.getInstance();
 
-        mAuthStateListener = new FirebaseAuth.AuthStateListener(){
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(mAuth.getCurrentUser() != null){
+                if (mAuth.getCurrentUser() != null) {
                     startActivity(new Intent(LoginActivity.this, MainPanelActivity.class));
                 }
             }
@@ -136,7 +126,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         mEmail_User = (EditText) findViewById(R.id.mainEmail);
         mPass_User = (EditText) findViewById(R.id.mainPassword);
         btn_Login = (Button) findViewById(R.id.mainLogin);
-        btn_Signup = (Button)findViewById(R.id.mainSignup);
+        btn_Signup = (Button) findViewById(R.id.mainSignup);
         googleSign = (SignInButton) findViewById(R.id.signInGoogle);
     }
 
@@ -152,10 +142,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.mainLogin:
 
-                if(isValid()){
+                if (isValid()) {
                     presenter.checkUserPresent(email, pass);
                     firebaseLogin = true;
                 }
@@ -168,7 +158,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
                 break;
 
-            case R.id.signInGoogle :
+            case R.id.signInGoogle:
 
                 gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(getString(R.string.default_web_client_id))
@@ -183,7 +173,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                                 Toast.makeText(getApplicationContext(), "Connection Faild!!", Toast.LENGTH_SHORT).show();
 
                             }
-                        }).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+                        })
+                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
 
                 signIn();
 
@@ -194,16 +185,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private void signIn() {
 
-        if(isNetworkConnected()) {
+        if (isNetworkConnected()) {
 
             if (isInternetAvailable()) {
                 progressShow("Signing In..");
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                startActivityForResult(signInIntent, Constant.RC_SIGN_IN);
             } else {
                 Toast.makeText(this, "No Internet Availabe!!", Toast.LENGTH_SHORT).show();
             }
-        }else{
+        } else {
             Toast.makeText(this, "No Internet Connection!!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -213,7 +204,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         super.onActivityResult(requestCode, resultCode, data);
 
 
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == Constant.RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
             if (result.isSuccess()) {
@@ -222,7 +213,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             }
         }
 
-        cm.onActivityResult(requestCode,resultCode,data);
+        cm.onActivityResult(requestCode, resultCode, data);
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -255,12 +246,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         getData();
 
-        if(TextUtils.isEmpty(email) && TextUtils.isEmpty(pass)){
+        if (TextUtils.isEmpty(email) && TextUtils.isEmpty(pass)) {
             Toast.makeText(this, Constant.field_empty, Toast.LENGTH_SHORT).show();
-        }
-        else if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        } else if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             mEmail_User.setError(Constant.valid_email);
-        }else{
+        } else {
             isValidData = true;
         }
 
@@ -284,7 +274,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    ProgressDialog progress;
     @Override
     public void progressShow(String msg) {
         progress = new ProgressDialog(this);
@@ -338,7 +327,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             startActivity(i);
                         } else {
                             LoginManager.getInstance().logOut();
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

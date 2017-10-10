@@ -71,9 +71,6 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 if(isValid()) {
                     presenter.getData(First, Last, email, phone, pass);
                 }
-                else {
-                    Toast.makeText(this, Constant.enter_correct_data, Toast.LENGTH_SHORT).show();
-                }
                 break;
         }
     }
@@ -96,23 +93,45 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         boolean isValide = true;
 
         if (First.isEmpty() || First.length() > 20) {
+
             user_First_name.setError("Enter First Name");
             isValide = false;
-        }
-        if (Last.isEmpty() || Last.length() > 20) {
-            user_Last_Name.setError("Enter Last Name");
+        }else if(!First.matches("^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$")){
+
+            user_First_name.setError("Enter Correct Name");
             isValide = false;
         }
+
+        if (Last.isEmpty() || Last.length() > 20) {
+
+            user_Last_Name.setError("Enter Last Name");
+            isValide = false;
+        }else if(!Last.matches("^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$")){
+
+            user_Last_Name.setError("Enter Correct Last Name");
+            isValide = false;
+        }
+
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             user_Email.setError("Enter Valide Email");
             isValide = false;
         }
+
         if (phone.isEmpty() || phone.length() != 10) {
+
             user_Phone.setError("Enter 10 digit Number");
             isValide = false;
+
+        }else if(!phone.matches("^[789]{1}[0-9]{9}$")){
+            user_Phone.setError("Phone No Must be Started With 7,8,9");
+            isValide = false;
         }
-        if (pass.isEmpty() || pass.length() < 6) {
+
+        if (pass.isEmpty() || pass.length() < 6 ) {
             user_First_Password.setError("Minimum 6 Charachter");
+            isValide = false;
+        }else if(!pass.matches("^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}[0-9]{0,}$")){
+            user_First_Password.setError("Enter Only Capital and Lower Case Character and 0-9");
             isValide = false;
         }
         if (cpass.isEmpty() || !cpass.equals(pass)) {

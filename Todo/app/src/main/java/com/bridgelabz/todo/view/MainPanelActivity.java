@@ -1,36 +1,45 @@
 package com.bridgelabz.todo.view;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bridgelabz.todo.R;
+import com.bridgelabz.todo.adapter.TrashDataAdapter;
 import com.bridgelabz.todo.archivefragment.view.ArchiveFragment;
 import com.bridgelabz.todo.login.view.LoginActivity;
+import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.model.UserData;
 import com.bridgelabz.todo.notefragment.View.NoteFragment;
 import com.bridgelabz.todo.reminderfragment.view.ReminderFragment;
+import com.bridgelabz.todo.trashfragment.interacter.TrashFragmentInteracter;
 import com.bridgelabz.todo.trashfragment.view.TrashFragment;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.bitmap_recycle.IntegerArrayAdapter;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,15 +53,24 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.R.attr.data;
+import static android.R.attr.id;
+import static android.R.attr.x;
+import static java.security.AccessController.getContext;
 
 public class MainPanelActivity extends AppCompatActivity {
 
     public static MaterialSearchView materialSearchView;
+    static Toolbar toolbar, toolbar1;
+    static boolean isDeleteMode = false;
+    static Window window;
+    public static ArrayList<Integer> index;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
-    Toolbar toolbar;
     ProgressDialog progress;
     FirebaseAuth mAuth;
     String userName;
@@ -64,21 +82,51 @@ public class MainPanelActivity extends AppCompatActivity {
     String fragName = "Note";
     boolean isPicEditable = false;
     int SELECT_IMAGE;
-
     StorageReference storageRef;
-
-    String picUri;
     String userID;
-
     Uri downloadUri;
-
     CollectionReference docRef;
     String download;
+    public static boolean isOnClickEnable = false;
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void change() {
+
+        toolbar.setVisibility(View.GONE);
+        toolbar1.setVisibility(View.VISIBLE);
+        toolbar1.setTitle(" 0 ItemSelected");
+        toolbar1.setDrawingCacheBackgroundColor(Color.GRAY);
+        isDeleteMode = true;
+
+    }
+
+    public static void updateToolbarTitle(int toDelete) {
+        toolbar1.setTitle(toDelete + " ItemSelected");
+    }
+
+    public static void getToDataAdd(int id) {
+        index.add(id);
+        updateToolbarTitle(index.size());
+    }
+
+    public static void getToDataDelete(int id) {
+
+        for (int i = 0; i < index.size(); i++){
+            if(id == index.get(i)){
+                index.remove(i);
+            }
+        }
+        updateToolbarTitle(index.size());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_panel);
+
+        index = new ArrayList<>();
+
+        window = getWindow();
 
         userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -89,6 +137,19 @@ public class MainPanelActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         progress = new ProgressDialog(this);
+
+        toolbar1 = (Toolbar) findViewById(R.id.toolbar1);
+        setSupportActionBar(toolbar1);
+        toolbar1.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isDeleteMode = false;
+                toolbar1.setVisibility(View.GONE);
+                toolbar.setVisibility(View.VISIBLE);
+                TrashFragmentInteracter.dataAdapter.notifyDataSetChanged();
+                isOnClickEnable = false;
+            }
+        });
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -336,6 +397,7 @@ public class MainPanelActivity extends AppCompatActivity {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void displaySelectedFragment(int id) {
 
 
@@ -345,21 +407,25 @@ public class MainPanelActivity extends AppCompatActivity {
         if (id == R.id.userNotes) {
             toolbar.setTitle("Note");
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+            window.setStatusBarColor(getResources().getColor(R.color.colorAccent));
             fragName = "Note";
             fragment = new NoteFragment();
         } else if (id == R.id.userReminders) {
             toolbar.setTitle("Reminder");
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorReminder));
+            window.setStatusBarColor(getResources().getColor(R.color.colorReminder));
             fragName = "Reminder";
             fragment = new ReminderFragment();
         } else if (id == R.id.userArchive) {
             toolbar.setTitle("Archive");
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorArchive));
+            window.setStatusBarColor(getResources().getColor(R.color.colorArchive));
             fragName = "Archive";
             fragment = new ArchiveFragment();
         } else if (id == R.id.userTrash) {
             toolbar.setTitle("Trash");
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorTrash));
+            window.setStatusBarColor(getResources().getColor(R.color.colorTrash));
             fragName = "Trash";
             fragment = new TrashFragment();
         } else if (id == R.id.userLogout) {
@@ -387,11 +453,15 @@ public class MainPanelActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_panel_menu, menu);
 
+        toolbar1.inflateMenu(R.menu.onlognpressed);
+
         MenuItem item = menu.findItem(R.id.search);
         materialSearchView.setMenuItem(item);
 
         return super.onCreateOptionsMenu(menu);
     }
+
+    ArrayList<DataModel> dataModels;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -408,6 +478,48 @@ public class MainPanelActivity extends AppCompatActivity {
                 TrashFragment.onItemSelected(item);
             }
 
+        } else if (item.getItemId() == R.id.deleteNote) {
+
+            dataModels = new ArrayList<>();
+
+            final CollectionReference coll = FirebaseFirestore.getInstance().collection("Data").document(userID).collection("Notes");
+
+            coll.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot documentSnapshots) {
+
+                    for (DocumentSnapshot doc : documentSnapshots.getDocuments()) {
+
+                        DataModel getUserData = doc.toObject(DataModel.class);
+
+                        dataModels.add(getUserData);
+                    }
+
+                    if (index.size() != 1) {
+                        int x = 0;
+
+                        for (int i = 0; i < index.size(); i++) {
+                            for (int j = 0; j < index.size(); j++) {
+                                x = 0;
+                                if (index.get(i) == Integer.parseInt(TrashDataAdapter.list.get(j).getKey())) {
+                                    do {
+                                        if (TrashDataAdapter.list.get(j).getId().equals(dataModels.get(x).getId())) {
+                                            coll.document(dataModels.get(x).getId()).delete();
+                                            TrashFragment.resetRecyclerView();
+                                        }
+                                        x++;
+                                    } while (x < dataModels.size());
+                                }
+                            }
+                        }
+                        TrashFragment.presenter.showSnacBar(index.size() + " Item Deleted!!");
+                        index.clear();
+                        onBackPressed();
+                    }else{
+                        Toast.makeText(MainPanelActivity.this, "Plase Select More Than 1", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
 
         return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
@@ -419,7 +531,21 @@ public class MainPanelActivity extends AppCompatActivity {
 
         if (drawerLayout.isDrawerOpen(Gravity.START))
             drawerLayout.closeDrawer(Gravity.START);
-        else {
+        else if (fragName.equals("Trash")) {
+            if (isDeleteMode) {
+                isDeleteMode = false;
+                toolbar1.setVisibility(View.GONE);
+                toolbar.setVisibility(View.VISIBLE);
+                isOnClickEnable = false;
+                TrashFragmentInteracter.dataAdapter.notifyDataSetChanged();
+            } else {
+                Intent a = new Intent(Intent.ACTION_MAIN);
+                a.addCategory(Intent.CATEGORY_HOME);
+                a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(a);
+                super.onBackPressed();
+            }
+        } else {
             Intent a = new Intent(Intent.ACTION_MAIN);
             a.addCategory(Intent.CATEGORY_HOME);
             a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

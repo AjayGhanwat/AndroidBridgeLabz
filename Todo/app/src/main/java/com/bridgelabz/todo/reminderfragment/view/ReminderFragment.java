@@ -73,6 +73,8 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
         return inflater.inflate(R.layout.activity_reminder, container, false);
     }
 
+    public static FloatingActionButton fab;
+
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -93,7 +95,7 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
         clickListning();
 
 
-        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
+        fab = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.DatePicker;
@@ -19,11 +20,22 @@ import android.widget.Toast;
 import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.todo.base.BaseActivity;
+import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.view.ScheduleClient;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.bridgelabz.todo.R.array.colorArray;
 import static com.bridgelabz.todo.R.drawable.ic_view_quilt_black_24dp;
@@ -93,6 +105,47 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
         scheduleClient.doBindService();
     }
 
+    CollectionReference reference;
+
+    FirebaseAuth mAuth;
+
+    public String Key;
+    public String userDate;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mAuth = FirebaseAuth.getInstance();
+
+        String userID = mAuth.getCurrentUser().getUid();
+
+        reference = FirebaseFirestore.getInstance().collection("Data").document(userID).collection("Notes");
+
+        reference.orderBy("key").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+
+                for (DocumentSnapshot postSnapshot : documentSnapshots.getDocuments()) {
+
+                    DataModel match = postSnapshot.toObject(DataModel.class);
+
+                    if (match.getKey() == null && match.getDate() == null) {
+                        Date cDate = new Date();
+
+                        String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
+                        Key = "0";
+                        userDate = fDate;
+                    } else {
+                        Key = match.getKey();
+                        userDate = match.getDate();
+                    }
+                }
+
+            }
+        });
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
 
@@ -105,38 +158,41 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
     private void getDataStored() {
 
-        String ReminderDate = "null";
-        String ReminderTime = "null";
-        boolean reminder = false;
+        if(!TextUtils.isEmpty(title) || !TextUtils.isEmpty(decs)) {
 
-        if (mYear != 0 && mMonth != 0 && mDay!= 0) {
-            Calendar c = Calendar.getInstance();
-            c.set(mYear, mMonth -1, mDay);
-            c.set(Calendar.HOUR_OF_DAY, hour_x);
-            c.set(Calendar.MINUTE, minute_x);
-            c.set(Calendar.SECOND, 0);
+            String ReminderDate = "null";
+            String ReminderTime = "null";
+            boolean reminder = false;
 
-            scheduleClient.setAlarmForNotification(c);
+            if (mYear != 0 && mMonth != 0 && mDay != 0) {
+                Calendar c = Calendar.getInstance();
+                c.set(mYear, mMonth - 1, mDay);
+                c.set(Calendar.HOUR_OF_DAY, hour_x);
+                c.set(Calendar.MINUTE, minute_x);
+                c.set(Calendar.SECOND, 0);
 
-            String mMonth;
+                scheduleClient.setAlarmForNotification(c);
 
-            reminder = true;
+                String mMonth;
 
-            if (month_x < 10 && month_x != 0 ) {
-                mMonth = "0" + month_x;
+                reminder = true;
+
+                if (month_x < 10 && month_x != 0) {
+                    mMonth = "0" + month_x;
+                } else {
+                    mMonth = month_x + "";
+                }
+
+                ReminderDate = year_x + "-" + mMonth + "-" + day_x;
+
+                ReminderTime = hour_x + "-" + minute_x;
+
+                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
             } else {
-                mMonth = month_x + "";
+                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
+                if (scheduleClient != null)
+                    scheduleClient.doUnbindService();
             }
-
-            ReminderDate = year_x + "-" + mMonth + "-" + day_x;
-
-            ReminderTime = hour_x + "-" + minute_x;
-
-            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
-        } else {
-            presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
-            if (scheduleClient != null)
-                scheduleClient.doUnbindService();
         }
     }
 
@@ -174,37 +230,39 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
         } else if (id == R.id.saveNote) {
 
-            if (mYear != 0 && mMonth != 0 && mDay!= 0) {
-                Calendar c = Calendar.getInstance();
-                c.set(mYear, mMonth -1, mDay);
-                c.set(Calendar.HOUR_OF_DAY, hour_x);
-                c.set(Calendar.MINUTE, minute_x);
-                c.set(Calendar.SECOND, 0);
+            if(!TextUtils.isEmpty(title) || !TextUtils.isEmpty(decs)) {
 
-                scheduleClient.setAlarmForNotification(c);
+                if (mYear != 0 && mMonth != 0 && mDay != 0) {
+                    Calendar c = Calendar.getInstance();
+                    c.set(mYear, mMonth - 1, mDay);
+                    c.set(Calendar.HOUR_OF_DAY, hour_x);
+                    c.set(Calendar.MINUTE, minute_x);
+                    c.set(Calendar.SECOND, 0);
 
-                String mMonth;
+                    scheduleClient.setAlarmForNotification(c);
 
-                reminder = true;
+                    String mMonth;
 
-                if (month_x < 10 && month_x != 0) {
-                    mMonth = "0" + month_x;
+                    reminder = true;
+
+                    if (month_x < 10 && month_x != 0) {
+                        mMonth = "0" + month_x;
+                    } else {
+                        mMonth = month_x + "";
+                    }
+
+                    ReminderDate = year_x + "-" + mMonth + "-" + day_x;
+
+                    ReminderTime = hour_x + "-" + minute_x;
+
+                    presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
                 } else {
-                    mMonth = month_x + "";
+                    presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
+                    if (scheduleClient != null)
+                        scheduleClient.doUnbindService();
                 }
-
-                ReminderDate = year_x + "-" + mMonth + "-" + day_x;
-
-                ReminderTime = hour_x + "-" + minute_x;
-
-                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
-            } else {
-                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime,isPinned);
-                if (scheduleClient != null)
-                    scheduleClient.doUnbindService();
             }
             onBackPressed();
-
         } else if (id == R.id.colorNote) {
             new ColorDialog.Builder(this)
                     .setColorShape(ColorShape.CIRCLE)

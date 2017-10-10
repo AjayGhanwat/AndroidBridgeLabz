@@ -49,12 +49,24 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
 
         String hexColor = String.format("#%06X", (0xFFFFFF & color));
 
-        holder.user_Title.setText(list.get(position).getTitle());
-        holder.user_desc.setText(list.get(position).getDesc());
+        if(!list.get(position).getTitle().isEmpty()) {
+            holder.user_Title.setVisibility(View.VISIBLE);
+            holder.user_Title.setText(list.get(position).getTitle());
+        }else{
+            holder.user_Title.setVisibility(View.GONE);
+        }
+        if(!list.get(position).getDesc().isEmpty()) {
+            holder.user_desc.setVisibility(View.VISIBLE);
+            holder.user_desc.setText(list.get(position).getDesc());
+        }else{
+            holder.user_desc.setVisibility(View.GONE);
+        }
         holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
         if (list.get(position).getPin()) {
+            holder.imageView.setVisibility(View.VISIBLE);
             holder.imageView.setImageResource(R.drawable.pinned);
-        }
+        }else
+            holder.imageView.setVisibility(View.GONE);
     }
 
     @Override
@@ -106,15 +118,6 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
 
                 }
             });
-
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-
-                    return true;
-                }
-            });
-
         }
     }
 }

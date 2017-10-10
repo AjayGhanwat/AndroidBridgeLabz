@@ -47,7 +47,7 @@ import static com.bridgelabz.todo.R.drawable.ic_view_quilt_black_24dp;
 public class TrashFragment extends BaseFragment implements TrashFragmentInterface{
 
     View v;
-    static RecyclerView recyclerView;
+    public static RecyclerView recyclerView;
 
     RelativeLayout relativeLayout;
 
@@ -57,7 +57,7 @@ public class TrashFragment extends BaseFragment implements TrashFragmentInterfac
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
 
-    static TrashFragmentPresenterInterface presenter;
+    public static TrashFragmentPresenterInterface presenter;
 
     static CollectionReference collectionReference;
 

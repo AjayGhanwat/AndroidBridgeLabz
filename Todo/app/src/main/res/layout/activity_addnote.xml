@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.bridgelabz.note.addnotes.view.AddActivity"
+    tools:context="com.bridgelabz.todo.addnotes.view.AddActivity"
     android:weightSum="1">
 
     <include
@@ -20,8 +20,6 @@
         android:textStyle="bold"
         android:textSize="18sp"
         android:layout_margin="10dp"
-        android:paddingTop="20dp"
-        android:maxLines="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"/>
@@ -34,7 +32,6 @@
         android:maxLines="10"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        />
+        android:background="@android:color/transparent"/>
 
 </LinearLayout>

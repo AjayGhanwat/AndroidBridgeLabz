@@ -1,10 +1,10 @@
 package com.bridgelabz.todo.adapter;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -14,6 +14,9 @@ import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.view.MainPanelActivity;
 
 import java.util.ArrayList;
+
+import static com.bridgelabz.todo.view.MainPanelActivity.index;
+import static com.bridgelabz.todo.view.MainPanelActivity.isOnClickEnable;
 
 public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.userViewHolder> {
 
@@ -33,7 +36,7 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
     }
 
     @Override
-    public void onBindViewHolder(userViewHolder holder, int position) {
+    public void onBindViewHolder(final userViewHolder holder, final int position) {
 
         int color;
 
@@ -43,9 +46,23 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
 
         String hexColor = String.format("#%06X", (0xFFFFFF & color));
 
-        holder.user_Title.setText(list.get(position).getTitle());
-        holder.user_desc.setText(list.get(position).getDesc());
+        if (!list.get(position).getTitle().isEmpty()) {
+            holder.user_Title.setVisibility(View.VISIBLE);
+            holder.user_Title.setText(list.get(position).getTitle());
+        } else {
+            holder.user_Title.setVisibility(View.GONE);
+        }
+        if (!list.get(position).getDesc().isEmpty()) {
+            holder.user_desc.setVisibility(View.VISIBLE);
+            holder.user_desc.setText(list.get(position).getDesc());
+        } else {
+            holder.user_desc.setVisibility(View.GONE);
+        }
         holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
+
+//        holder.user_Title.setText(list.get(position).getTitle());
+//        holder.user_desc.setText(list.get(position).getDesc());
+//        holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
 
     }
 
@@ -54,12 +71,11 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
         return list.size();
     }
 
-    public class userViewHolder extends RecyclerView.ViewHolder{
+    public class userViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener{
+        public CardView card;
         TextView user_Title;
         TextView user_desc;
-        MainPanelActivity mainPanelActivity;
-
-        public CardView card;
+        boolean isClicked = true;
 
         public userViewHolder(final View itemView) {
             super(itemView);
@@ -67,7 +83,41 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
             user_desc = (TextView) itemView.findViewById(R.id.descTextView);
             card = (CardView) itemView.findViewById(R.id.cardView);
 
+            index.clear();
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+
+                    MainPanelActivity.change();
+                    isOnClickEnable = true;
+                    return false;
+                }
+            });
+            itemView.setOnTouchListener(this);
         }
 
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            if (isOnClickEnable) {
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (isClicked) {
+                            card.setCardBackgroundColor(itemView.getResources().getColor(R.color.cardview_shadow_start_color));
+                            MainPanelActivity.getToDataAdd(getAdapterPosition());
+                            isClicked = false;
+                        } else {
+                            MainPanelActivity.getToDataDelete(getAdapterPosition());
+                            int color = list.get(getAdapterPosition()).getColor();
+                            String hexColor = String.format("#%06X", (0xFFFFFF & color));
+                            card.setCardBackgroundColor(Color.parseColor(hexColor));
+                            isClicked = true;
+                        }
+                    }
+                });
+            }
+            return false;
+        }
     }
 }

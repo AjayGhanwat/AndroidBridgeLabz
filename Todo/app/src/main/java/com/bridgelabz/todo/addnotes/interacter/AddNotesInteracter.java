@@ -4,10 +4,14 @@ import android.content.Context;
 
 import com.bridgelabz.todo.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.todo.addnotes.presenter.AddNotePresenterInterface;
+import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.notefragment.interacter.NoteFragmentInteracter;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,7 +22,6 @@ public class AddNotesInteracter implements AddNotesInteracterInterface {
 
     Context context;
     AddNotePresenterInterface presenter;
-    FirebaseAuth mAuth;
 
     CollectionReference mRef;
 
@@ -29,8 +32,10 @@ public class AddNotesInteracter implements AddNotesInteracterInterface {
 
     }
 
+    FirebaseAuth mAuth;
+
     @Override
-    public void addNoteReminderFirebaase(String title, String decs, int userColor, boolean reminder, String reminderDate, String reminderTime, boolean isPinned) {
+    public void addNoteReminderFirebaase(String title, String decs, int userColor, boolean reminder, String reminderDate, String reminderTime, boolean isPinned,String Key, String userDate) {
 
         presenter.showProgresss("Adding Note");
 
@@ -44,17 +49,14 @@ public class AddNotesInteracter implements AddNotesInteracterInterface {
 
         String key1;
 
-        String previousDate = NoteFragmentInteracter.userDate;
-
         Date cDate = new Date();
         String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
 
-        if (previousDate != null) {
-            if (previousDate.equals(fDate)) {
-                if (NoteFragmentInteracter.Key != null) {
-                    String id = NoteFragmentInteracter.Key;
+        if (userDate != null) {
+            if (userDate.equals(fDate)) {
+                if (Key != null) {
 
-                    int key = Integer.parseInt(id);
+                    int key = Integer.parseInt(Key);
                     key++;
 
                     key1 = key + "";
@@ -63,20 +65,20 @@ public class AddNotesInteracter implements AddNotesInteracterInterface {
                 }
             } else {
 
-                if (NoteFragmentInteracter.Key != null) {
+                if (Key != null) {
                     int key = -1;
                     key++;
 
                     key1 = key + "";
 
-                    previousDate = fDate;
+                    userDate = fDate;
 
                 } else {
                     key1 = "0";
                 }
             }
         } else {
-            previousDate = fDate;
+            userDate = fDate;
             key1 = "0";
         }
 

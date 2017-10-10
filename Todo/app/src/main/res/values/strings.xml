@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Todo</string>
+    <string name="app_name">Note</string>
     <string name="icon">Icon</string>
     <string name="email">Email</string>
     <string name="password">Password</string>

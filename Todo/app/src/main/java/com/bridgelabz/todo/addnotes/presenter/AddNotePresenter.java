@@ -16,8 +16,8 @@ public class AddNotePresenter implements AddNotePresenterInterface{
         interacter = new AddNotesInteracter(context, this);
     }
 
-    public void addnoteReminder(String title, String decs, int userColor,boolean reminder, String reminderDate, String reminderTime, boolean isPinned) {
-        interacter.addNoteReminderFirebaase(title,decs, userColor, reminder , reminderDate, reminderTime,isPinned);
+    public void addnoteReminder(String title, String decs, int userColor,boolean reminder, String reminderDate, String reminderTime, boolean isPinned, String Key, String userDate) {
+        interacter.addNoteReminderFirebaase(title,decs, userColor, reminder , reminderDate, reminderTime,isPinned, Key, userDate);
     }
 
     @Override
