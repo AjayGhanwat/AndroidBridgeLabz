@@ -19,7 +19,7 @@ import com.bridgelabz.todo.base.BaseActivity;
 import com.bridgelabz.todo.constant.Constant;
 import com.bridgelabz.todo.login.presenter.LoginUserPresenter;
 import com.bridgelabz.todo.register.view.RegisterActivity;
-import com.bridgelabz.todo.view.MainPanelActivity;
+import com.bridgelabz.todo.MainPanelActivity;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;

@@ -14,9 +14,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.addnotes.view.AddActivity;
-import com.bridgelabz.todo.editnote.view.EditNote;
-import com.bridgelabz.todo.notefragment.View.NoteFragment;
-import com.bridgelabz.todo.reminderfragment.view.ReminderFragment;
+import com.bridgelabz.todo.note.View.NoteFragment;
 
 public class NotifyService extends Service{
 

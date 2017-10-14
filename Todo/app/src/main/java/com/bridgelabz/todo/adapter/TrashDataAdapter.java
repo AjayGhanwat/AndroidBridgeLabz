@@ -3,6 +3,7 @@ package com.bridgelabz.todo.adapter;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,12 +12,12 @@ import android.widget.TextView;
 
 import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.model.DataModel;
-import com.bridgelabz.todo.view.MainPanelActivity;
+import com.bridgelabz.todo.MainPanelActivity;
 
 import java.util.ArrayList;
 
-import static com.bridgelabz.todo.view.MainPanelActivity.index;
-import static com.bridgelabz.todo.view.MainPanelActivity.isOnClickEnable;
+import static com.bridgelabz.todo.MainPanelActivity.index;
+import static com.bridgelabz.todo.MainPanelActivity.isOnClickEnable;
 
 public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.userViewHolder> {
 
@@ -71,7 +72,7 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
         return list.size();
     }
 
-    public class userViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener{
+    public static class userViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener{
         public CardView card;
         TextView user_Title;
         TextView user_desc;
@@ -105,10 +106,10 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
                     public void onClick(View view) {
                         if (isClicked) {
                             card.setCardBackgroundColor(itemView.getResources().getColor(R.color.cardview_shadow_start_color));
-                            MainPanelActivity.getToDataAdd(getAdapterPosition());
+                            MainPanelActivity.getToDataAdd(Integer.parseInt(list.get(getAdapterPosition()).getKey()));
                             isClicked = false;
                         } else {
-                            MainPanelActivity.getToDataDelete(getAdapterPosition());
+                            MainPanelActivity.getToDataDelete(Integer.parseInt(list.get(getAdapterPosition()).getKey()));
                             int color = list.get(getAdapterPosition()).getColor();
                             String hexColor = String.format("#%06X", (0xFFFFFF & color));
                             card.setCardBackgroundColor(Color.parseColor(hexColor));
@@ -118,6 +119,21 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
                 });
             }
             return false;
+        }
+
+        public static void refreshListData(ArrayList<Integer> index){
+
+            for (int i = 0; i < index.size(); i++){
+
+                for (int j = 0; j < list.size(); j++) {
+
+                    if (index.get(i) == Integer.parseInt(list.get(j).getKey())) {
+
+                        list.remove(j);
+                        Log.i("ListSize", "refreshListData: " + list.size());
+                    }
+                }
+            }
         }
     }
 }

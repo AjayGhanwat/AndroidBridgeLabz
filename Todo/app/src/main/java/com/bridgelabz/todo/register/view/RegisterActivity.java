@@ -13,9 +13,8 @@ import android.widget.Toast;
 import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.base.BaseActivity;
 import com.bridgelabz.todo.constant.Constant;
-import com.bridgelabz.todo.login.view.LoginActivity;
 import com.bridgelabz.todo.register.presenter.RegisterUserData;
-import com.bridgelabz.todo.view.MainPanelActivity;
+import com.bridgelabz.todo.MainPanelActivity;
 
 public class RegisterActivity extends BaseActivity implements View.OnClickListener, RegisterData {
 

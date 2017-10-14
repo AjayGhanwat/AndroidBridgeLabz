@@ -17,12 +17,7 @@ import com.bridgelabz.todo.editnote.view.EditNote;
 import com.bridgelabz.todo.model.DataModel;
 
 import java.util.ArrayList;
-
-import com.bridgelabz.todo.R;
-import com.bridgelabz.todo.editnote.view.EditNote;
-import com.bridgelabz.todo.model.DataModel;
-import com.bridgelabz.todo.notefragment.View.NoteFragment;
-import com.bridgelabz.todo.view.MainPanelActivity;
+import java.util.Collections;
 
 public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userViewHolder> {
 

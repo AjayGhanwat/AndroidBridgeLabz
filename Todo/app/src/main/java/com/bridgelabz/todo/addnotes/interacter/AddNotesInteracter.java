@@ -4,14 +4,9 @@ import android.content.Context;
 
 import com.bridgelabz.todo.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.todo.addnotes.presenter.AddNotePresenterInterface;
-import com.bridgelabz.todo.model.DataModel;
-import com.bridgelabz.todo.notefragment.interacter.NoteFragmentInteracter;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
