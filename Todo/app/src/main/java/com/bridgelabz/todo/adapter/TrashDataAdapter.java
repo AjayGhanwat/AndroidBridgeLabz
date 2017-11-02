@@ -1,6 +1,7 @@
 package com.bridgelabz.todo.adapter;
 
 import android.graphics.Color;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -43,7 +44,7 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
 
         key = list.get(position).getKey();
         color = list.get(position).getColor();
-        date = list.get(position).getDate();
+        //date = list.get(position).getDate();
 
         String hexColor = String.format("#%06X", (0xFFFFFF & color));
 
@@ -60,6 +61,10 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
             holder.user_desc.setVisibility(View.GONE);
         }
         holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
+        if (list.get(position).getPin()) {
+            holder.imageView.setVisibility(View.VISIBLE);
+        }else
+            holder.imageView.setVisibility(View.GONE);
 
 //        holder.user_Title.setText(list.get(position).getTitle());
 //        holder.user_desc.setText(list.get(position).getDesc());
@@ -76,6 +81,8 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
         public CardView card;
         TextView user_Title;
         TextView user_desc;
+        AppCompatImageView imageView;
+
         boolean isClicked = true;
 
         public userViewHolder(final View itemView) {
@@ -83,6 +90,7 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
             user_Title = (TextView) itemView.findViewById(R.id.titleTextView);
             user_desc = (TextView) itemView.findViewById(R.id.descTextView);
             card = (CardView) itemView.findViewById(R.id.cardView);
+            imageView = (AppCompatImageView) itemView.findViewById(R.id.importantPin);
 
             index.clear();
 
@@ -130,7 +138,6 @@ public class TrashDataAdapter extends RecyclerView.Adapter<TrashDataAdapter.user
                     if (index.get(i) == Integer.parseInt(list.get(j).getKey())) {
 
                         list.remove(j);
-                        Log.i("ListSize", "refreshListData: " + list.size());
                     }
                 }
             }

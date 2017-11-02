@@ -1,7 +1,10 @@
 package com.bridgelabz.todo.note.View;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,15 +27,18 @@ import com.bridgelabz.todo.addnotes.view.AddActivity;
 import com.bridgelabz.todo.base.BaseFragment;
 import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.model.UserData;
+import com.bridgelabz.todo.note.interacter.NoteFragmentInteracter;
 import com.bridgelabz.todo.note.presenter.NoteFragmentPresenter;
 import com.bridgelabz.todo.note.presenter.NoteFragmentPresenterInterface;
+import com.bridgelabz.todo.sqlitedatabase.SQLiteDatabaseHandler;
+import com.bridgelabz.todo.util.NetworkChangeReceiver;
+import com.bridgelabz.todo.util.NetworkConnection;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -40,33 +47,248 @@ import java.util.Map;
 
 import static com.bridgelabz.todo.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.todo.R.drawable.ic_view_quilt_black_24dp;
+import static com.bridgelabz.todo.constant.Constant.user_layouts;
+import static com.bridgelabz.todo.constant.Constant.user_layouts_grid;
+import static com.bridgelabz.todo.constant.Constant.user_layouts_linear;
+import static com.bridgelabz.todo.constant.Constant.user_note_changes_undo;
+import static com.bridgelabz.todo.constant.Constant.user_note_restored;
+import static com.bridgelabz.todo.constant.Constant.user_users_FirebaseFirestore;
+import static com.bridgelabz.todo.constant.Constant.user_users_info_FirebaseFirestore;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class NoteFragment extends BaseFragment implements NoteFragmentInterface {
 
-    View v;
-    Bundle bundle;
-
     public static RecyclerView recyclerView;
-    ProgressDialog progress;
-
+    public static ArrayList<DataModel> unpinDataRe;
+    static BroadcastReceiver receiver  = new NetworkChangeReceiver();
     static TextView pinned;
     static TextView unpinned;
     static RecyclerView pinrecyclerView;
-
     static CollectionReference collectionReference;
-
     static LinearLayoutManager linearLayoutManager;
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
-
+    static String userId;
+    static NoteFragmentPresenterInterface presenter;
+    static ArrayList<DataModel> pinDataRe;
+    static NoteDataAdapter pinDataAda, unpinDataAda;
+    static int startLoc = -1;
+    static int startChangeLoc = -1;
+    static int endLoc = -1;
+    static View v;
+    Bundle bundle;
+    ProgressDialog progress;
     RelativeLayout relativeLayout;
-
     String layout;
 
-    static String userId;
+    /*
+     *  As per the change in layout of recycler it will stored in the database.
+     */
 
-    static NoteFragmentPresenterInterface presenter;
+    public static void onItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.layoutManager) {
+
+            if (!linearLayoutManager.equals(layoutManager)) {
+                layoutManager = linearLayoutManager;
+                item.setIcon(ic_view_quilt_black_24dp);
+                Map<String, Object> changeLayout = new HashMap<>();
+                changeLayout.put(user_layouts, user_layouts_linear);
+                collectionReference.document(userId).set(changeLayout);
+                recyclerView.setLayoutManager(layoutManager);
+                pinrecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            } else if (linearLayoutManager.equals(layoutManager)) {
+                layoutManager = gridLayoutManager;
+                item.setIcon(ic_view_list_black_24dp);
+                Map<String, Object> changeLayout = new HashMap<>();
+                changeLayout.put(user_layouts, user_layouts_grid);
+                collectionReference.document(userId).set(changeLayout);
+                recyclerView.setLayoutManager(layoutManager);
+                pinrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 1));
+            }
+        }
+    }
+
+    public static void searchItem(String newText) {
+
+        presenter.searchItemData(recyclerView, newText);
+        presenter.searchItemData(pinrecyclerView, newText);
+
+    }
+
+    public static void resetRecyclerView() {
+
+        presenter.resetNoteRecycler(recyclerView);
+        presenter.resetNotePinRecycler(pinrecyclerView);
+    }
+
+    public static void updateNewData(final CollectionReference myDoc) {
+
+        pinDataRe = new ArrayList<>();
+        unpinDataRe = new ArrayList<>();
+
+        getApplicationContext().registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        if (NetworkConnection.isNetworkConnected(getApplicationContext())) {
+
+            if (NetworkConnection.isInternetAvailable()) {
+
+                pinDataRe.clear();
+                unpinDataRe.clear();
+                NoteFragmentInteracter.changeData.clear();
+
+                myDoc.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+
+                        SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(getApplicationContext());
+
+                        sqLiteDatabaseHandler.deleteAll();
+
+                        if (documentSnapshots != null) {
+
+                            for (DocumentSnapshot documents : documentSnapshots.getDocuments()) {
+
+                                DataModel userData = documents.toObject(DataModel.class);
+
+                                sqLiteDatabaseHandler.insertRecord(userData);
+
+                            }
+                        }
+
+                        pinDataRe.clear();
+                        unpinDataRe.clear();
+
+                        ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
+
+                        for (int i = 0; i < dataModels.size(); i++ )
+                        {
+
+                            if (dataModels.get(i).getPin()) {
+
+                                pinDataRe.add(dataModels.get(i));
+                                pinDataAda = new NoteDataAdapter(pinDataRe);
+                                pinrecyclerView.setAdapter(pinDataAda);
+                                pinDataAda.notifyDataSetChanged();
+
+                            } else if (!dataModels.get(i).getPin() && !dataModels.get(i).getArchive() && !dataModels.get(i).getTrash()) {
+
+                                unpinDataRe.add(dataModels.get(i));
+                                unpinDataAda = new NoteDataAdapter(unpinDataRe);
+                                recyclerView.setAdapter(unpinDataAda);
+                                unpinDataAda.notifyDataSetChanged();
+                                NoteFragmentInteracter.changeData.add(dataModels.get(i));
+                            }
+                        }
+                        recyclerView.invalidate();
+                    }
+                });
+            }
+
+        } else {
+
+            pinDataRe.clear();
+            unpinDataRe.clear();
+            NoteFragmentInteracter.changeData.clear();
+
+            myDoc.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+
+                    SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(getApplicationContext());
+                    ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
+
+                    for (int i = 0; i < dataModels.size(); i++) {
+
+                        if (dataModels.get(i).getPin()) {
+
+                            pinDataRe.add(dataModels.get(i));
+                            pinDataAda = new NoteDataAdapter(pinDataRe);
+                            pinrecyclerView.setAdapter(pinDataAda);
+                            pinDataAda.notifyDataSetChanged();
+
+                        } else if (!dataModels.get(i).getPin() && !dataModels.get(i).getArchive() && !dataModels.get(i).getTrash()) {
+
+                            unpinDataRe.add(dataModels.get(i));
+                            unpinDataAda = new NoteDataAdapter(unpinDataRe);
+                            recyclerView.setAdapter(unpinDataAda);
+                            unpinDataAda.notifyDataSetChanged();
+                            NoteFragmentInteracter.changeData.add(dataModels.get(i));
+                        }
+                    }
+                    recyclerView.invalidate();
+                }
+
+            });
+        }
+    }
+
+    /*
+     *  As soon as the fragment open the database will chanck for the new data and
+     *  the fragment is opened the databas echanges it will reflected on the activity
+     */
+
+    public static void changeLocationNote() {
+        ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                int swipeFlags = 0;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                if (startLoc == -1)
+                    startLoc = viewHolder.getAdapterPosition();
+                startChangeLoc = viewHolder.getAdapterPosition();
+                endLoc = target.getAdapterPosition();
+
+                NoteFragmentInteracter.dataAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                unpinDataAda.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+
+            @Override
+            public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+
+                if (startLoc == -1)
+                    startLoc = viewHolder.getAdapterPosition();
+
+                if (startLoc > -1) {
+                    presenter.changeLocationNote(startLoc, endLoc);
+                    /*NoteFragmentInteracter.dataAdapter.notifyItemMoved(startLoc, endLoc);
+                    unpinDataAda.notifyDataSetChanged();*/
+                }
+
+                startLoc = -1;
+                endLoc = -1;
+            }
+        });
+        touchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    /*
+     *   in the change location the it will change the location of different
+      *  card view in recycler view location.
+     */
+
+    public static void isChecked(int pinSize, int unPinSize) {
+        if (pinSize == 0 || unPinSize == 0) {
+            pinned.setVisibility(View.GONE);
+            unpinned.setVisibility(View.GONE);
+        } else {
+            pinned.setVisibility(View.VISIBLE);
+            unpinned.setVisibility(View.VISIBLE);
+        }
+    }
 
     @Nullable
     @Override
@@ -83,7 +305,7 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        collectionReference = FirebaseFirestore.getInstance().collection("User").document(userId).collection("UserInfo");
+        collectionReference = FirebaseFirestore.getInstance().collection(user_users_FirebaseFirestore).document(userId).collection(user_users_info_FirebaseFirestore);
 
         relativeLayout = (RelativeLayout) v.findViewById(R.id.relativeLayoutManager);
 
@@ -101,14 +323,16 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
                 startActivity(intent);
             }
         });
+
+        changeLocationNote();
     }
 
     private void isLayout() {
-        if(layout.equals("linear")) {
+        if (layout.equals(user_layouts_linear)) {
             layoutManager = linearLayoutManager;
             recyclerView.setLayoutManager(layoutManager);
             pinrecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        }else{
+        } else {
             layoutManager = gridLayoutManager;
             recyclerView.setLayoutManager(layoutManager);
             pinrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 1));
@@ -171,13 +395,13 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
     public void viewSnacBar(String msg) {
         Snackbar snackbar = Snackbar
                 .make(relativeLayout, msg, Snackbar.LENGTH_SHORT)
-                .setAction("UNDO", new View.OnClickListener() {
+                .setAction(user_note_changes_undo, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         presenter.undoChange();
                         presenter.showRecycler(recyclerView);
                         presenter.showPinnedRecycler(pinrecyclerView);
-                        Snackbar snackbar1 = Snackbar.make(relativeLayout,"Note Restored!", Snackbar.LENGTH_SHORT);
+                        Snackbar snackbar1 = Snackbar.make(relativeLayout, user_note_restored, Snackbar.LENGTH_SHORT);
                         snackbar1.show();
                     }
                 });
@@ -188,7 +412,7 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
     @Override
     public void initView() {
 
-        presenter = new NoteFragmentPresenter(getActivity(),this);
+        presenter = new NoteFragmentPresenter(getActivity(), this);
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerNote);
         recyclerView.setHasFixedSize(true);
@@ -202,95 +426,6 @@ public class NoteFragment extends BaseFragment implements NoteFragmentInterface 
 
     @Override
     public void clickListning() {
-
-    }
-
-    public static void onItemSelected(MenuItem item) {
-
-        if (item.getItemId() == R.id.layoutManager) {
-
-            if (!linearLayoutManager.equals(layoutManager)) {
-                layoutManager = linearLayoutManager;
-                item.setIcon(ic_view_quilt_black_24dp);
-                Map<String, Object> changeLayout = new HashMap<>();
-                changeLayout.put("layout", "linear");
-                collectionReference.document(userId).set(changeLayout);
-                recyclerView.setLayoutManager(layoutManager);
-                pinrecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-            } else if (linearLayoutManager.equals(layoutManager)) {
-                layoutManager = gridLayoutManager;
-                item.setIcon(ic_view_list_black_24dp);
-                Map<String, Object> changeLayout = new HashMap<>();
-                changeLayout.put("layout", "grid");
-                collectionReference.document(userId).set(changeLayout);
-                recyclerView.setLayoutManager(layoutManager);
-                pinrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 1));
-            }
-        }
-    }
-
-
-    public static void searchItem(String newText) {
-
-        presenter.searchItemData(recyclerView, newText);
-        presenter.searchItemData(pinrecyclerView, newText);
-
-    }
-
-    public static void resetRecyclerView() {
-
-        presenter.resetNoteRecycler(recyclerView);
-        presenter.resetNotePinRecycler(pinrecyclerView);
-    }
-
-    public static void isChecked(int pinSize, int unPinSize){
-        if(pinSize == 0 || unPinSize == 0){
-            pinned.setVisibility(View.GONE);
-            unpinned.setVisibility(View.GONE);
-        }else{
-            pinned.setVisibility(View.VISIBLE);
-            unpinned.setVisibility(View.VISIBLE);
-        }
-    }
-
-    static ArrayList<DataModel> pinDataRe, unpinDataRe;
-    static NoteDataAdapter pinDataAda, unpinDataAda;
-
-    public static void updateNewData(CollectionReference myDoc) {
-
-        pinDataRe = new ArrayList<>();
-        unpinDataRe = new ArrayList<>();
-
-        myDoc.orderBy("key", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-
-                pinDataRe.clear();
-                unpinDataRe.clear();
-
-                for (DocumentSnapshot documents : documentSnapshots.getDocuments()){
-
-                    DataModel userData = documents.toObject(DataModel.class);
-
-                    if(userData.getPin()){
-
-                        pinDataRe.add(userData);
-                        pinDataAda= new NoteDataAdapter(pinDataRe);
-                        pinrecyclerView.setAdapter(pinDataAda);
-                        pinDataAda.notifyDataSetChanged();
-
-                    }else if(!userData.getPin() && !userData.getArchive() && !userData.getTrash()){
-
-                        unpinDataRe.add(userData);
-                        unpinDataAda= new NoteDataAdapter(unpinDataRe);
-                        recyclerView.setAdapter(unpinDataAda);
-                        unpinDataAda.notifyDataSetChanged();
-
-                    }
-                }
-                recyclerView.invalidate();
-            }
-        });
 
     }
 

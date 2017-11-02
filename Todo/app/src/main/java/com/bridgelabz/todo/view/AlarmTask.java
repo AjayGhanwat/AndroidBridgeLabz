@@ -4,24 +4,22 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import java.util.Calendar;
 
-import static android.app.Service.START_NOT_STICKY;
 import static com.bridgelabz.todo.view.NotifyService.INTENT_NOTIFY;
 
 class AlarmTask implements Runnable {
 
     private final Calendar date;
 
-    private final AlarmManager am;
+    private final AlarmManager mAlarmManager;
 
     private final Context context;
 
-    public AlarmTask(Context context, Calendar date) {
+    AlarmTask(Context context, Calendar date) {
         this.context = context;
-        this.am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        this.mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         this.date = date;
     }
 
@@ -30,6 +28,6 @@ class AlarmTask implements Runnable {
         intent.putExtra(INTENT_NOTIFY, true);
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 
-        am.set(AlarmManager.RTC, date.getTimeInMillis(), pendingIntent);
+        mAlarmManager.set(AlarmManager.RTC, date.getTimeInMillis(), pendingIntent);
     }
 }

@@ -26,6 +26,17 @@ import java.util.Calendar;
 import static com.bridgelabz.todo.R.array.colorArray;
 import static com.bridgelabz.todo.R.drawable.pin;
 import static com.bridgelabz.todo.R.drawable.pinned;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_color;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_date;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_desc;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_key;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_noteID;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_pin;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_reminder;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_reminder_date;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_reminder_time;
+import static com.bridgelabz.todo.constant.Constant.extra_intents_data_title;
+import static com.bridgelabz.todo.constant.Constant.null_info;
 
 public class EditNote extends BaseActivity implements EditNotesInterface, ColorDialog.OnColorSelectedListener {
 
@@ -33,14 +44,14 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
     public static int hour_x;
     public static int minute_x;
     public static ScheduleClient scheduleClient;
-    EditText usertitle, userdesc;
+    EditText userTitle, userDesc;
     String user_title, user_desc, user_key, user_date, user_reminder_date, user_reminder_time, user_noteID;
     int user_color;
     boolean user_reminder;
-    String title, decs;
+    String mTitle, mDecs;
     boolean isPinned;
     EditNotePresenter presenter;
-    Calendar calendar;
+    Calendar mCalendar;
     ProgressDialog progress;
     private int Dialog_ID = 0;
     private int TimeDialog_ID = 1;
@@ -80,19 +91,19 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
         clickListner();
 
         Bundle extras = getIntent().getExtras();
-        user_title = extras.getString("Title");
-        user_desc = extras.getString("Desc");
-        user_key = extras.getString("Key");
-        user_color = extras.getInt("Color");
-        user_date = extras.getString("Date");
-        user_reminder_date = extras.getString("reminderDate");
-        user_reminder_time = extras.getString("reminderTime");
-        user_reminder = extras.getBoolean("reminder");
-        isPinned = extras.getBoolean("pin");
-        user_noteID = extras.getString("noteID");
+        user_title = extras.getString(extra_intents_data_title);
+        user_desc = extras.getString(extra_intents_data_desc);
+        user_key = extras.getString(extra_intents_data_key);
+        user_color = extras.getInt(extra_intents_data_color);
+        user_date = extras.getString(extra_intents_data_date);
+        user_reminder_date = extras.getString(extra_intents_data_reminder_date);
+        user_reminder_time = extras.getString(extra_intents_data_reminder_time);
+        user_reminder = extras.getBoolean(extra_intents_data_reminder);
+        isPinned = extras.getBoolean(extra_intents_data_pin);
+        user_noteID = extras.getString(extra_intents_data_noteID);
 
-        usertitle.setText(user_title);
-        userdesc.setText(user_desc);
+        userTitle.setText(user_title);
+        userDesc.setText(user_desc);
 
         if (user_color == 16777215) {
 
@@ -122,6 +133,11 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
         return true;
     }
 
+    /*
+     *   It get the all the data while go for the onBackpressed
+     *   It will go back then update the data in database if it is not null
+     */
+
     private void getDataStored() {
         String mMonth;
 
@@ -143,14 +159,14 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
                 user_reminder = true;
             }
 
-            presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
-        } else if(!user_reminder_date.equals("null")){
-            presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
+            presenter.editnote(mTitle, mDecs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
+        } else if (!user_reminder_date.equals(null_info)) {
+            presenter.editnote(mTitle, mDecs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
         } else {
-            user_reminder_date = "null";
-            user_reminder_time = "null";
+            user_reminder_date = null_info;
+            user_reminder_time = null_info;
 
-            presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
+            presenter.editnote(mTitle, mDecs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
         }
     }
 
@@ -197,15 +213,15 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
                     user_reminder = true;
                 }
 
-                presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
+                presenter.editnote(mTitle, mDecs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
 
-            } else if(!user_reminder_date.equals("null")){
-                presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
-            }else {
-                user_reminder_date = "null";
-                user_reminder_time = "null";
+            } else if (!user_reminder_date.equals(null_info)) {
+                presenter.editnote(mTitle, mDecs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
+            } else {
+                user_reminder_date = null_info;
+                user_reminder_time = null_info;
 
-                presenter.editnote(title, decs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
+                presenter.editnote(mTitle, mDecs, user_date, user_color, user_key, user_reminder, user_reminder_date, user_reminder_time, isPinned, user_noteID);
             }
 
             onSupportNavigateUp();
@@ -222,8 +238,8 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
     }
 
     private void getEnterData() {
-        title = usertitle.getText().toString();
-        decs = userdesc.getText().toString();
+        mTitle = userTitle.getText().toString();
+        mDecs = userDesc.getText().toString();
     }
 
     @Override
@@ -247,8 +263,8 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
 
         presenter = new EditNotePresenter(this, this);
 
-        usertitle = (EditText) findViewById(R.id.editTitle);
-        userdesc = (EditText) findViewById(R.id.editDesc);
+        userTitle = (EditText) findViewById(R.id.editTitle);
+        userDesc = (EditText) findViewById(R.id.editDesc);
     }
 
     @Override
@@ -289,11 +305,11 @@ public class EditNote extends BaseActivity implements EditNotesInterface, ColorD
 
     public void showDateDialogPicker() {
 
-        calendar = Calendar.getInstance();
+        mCalendar = Calendar.getInstance();
 
-        year_x = calendar.get(Calendar.YEAR);
-        month_x = calendar.get(Calendar.MONTH);
-        day_x = calendar.get(Calendar.DAY_OF_MONTH);
+        year_x = mCalendar.get(Calendar.YEAR);
+        month_x = mCalendar.get(Calendar.MONTH);
+        day_x = mCalendar.get(Calendar.DAY_OF_MONTH);
 
         showDialog(Dialog_ID);
     }

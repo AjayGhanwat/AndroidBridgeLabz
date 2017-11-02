@@ -7,23 +7,22 @@ import com.bridgelabz.todo.adapter.NoteDataAdapter;
 import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.reminder.presenter.ReminderFragmentPresenter;
 import com.bridgelabz.todo.reminder.presenter.ReminderFragmentPresenterInterface;
+import com.bridgelabz.todo.sqlitedatabase.SQLiteDatabaseHandler;
+import com.bridgelabz.todo.util.NetworkConnection;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-//import com.google.firebase.database.ChildEventListener;
-//import com.google.firebase.database.DataSnapshot;
-//import com.google.firebase.database.DatabaseError;
-//import com.google.firebase.database.DatabaseReference;
-//import com.google.firebase.database.FirebaseDatabase;
-//import com.google.firebase.database.GenericTypeIndicator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import static com.bridgelabz.todo.constant.Constant.user_data_FirebaseFirestore;
+import static com.bridgelabz.todo.constant.Constant.user_date_format;
+import static com.bridgelabz.todo.constant.Constant.user_note_FirebaseFirestore;
 
 public class ReminderFragmentInteracter implements ReminderFragmentInteracterInterface {
 
@@ -49,34 +48,48 @@ public class ReminderFragmentInteracter implements ReminderFragmentInteracterInt
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        reference = FirebaseFirestore.getInstance().collection("Data").document(userID).collection("Notes");
+        reference = FirebaseFirestore.getInstance().collection(user_data_FirebaseFirestore).document(userID).collection(user_note_FirebaseFirestore);
 
-        reference.orderBy("key", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot documentSnapshots) {
+        if(NetworkConnection.isNetworkConnected(context)){
 
-                for (DocumentSnapshot postSnapshot : documentSnapshots.getDocuments()) {
+            if (NetworkConnection.isInternetAvailable()){
 
-                    DataModel match = postSnapshot.toObject(DataModel.class);
+                reference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots) {
 
-                    Date date = new Date();
-                    String fdate = new SimpleDateFormat("yyyy-MM-dd").format(date);
-                    String isDate = new SimpleDateFormat("yyyy-MM-d").format(date);
+                        SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(context);
+                        ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
 
-                    if (fdate.equals(match.getReminderDate()) || isDate.equals(match.getReminderDate())) {
+                        for (int i = 0; i < dataModels.size(); i++) {
 
-                        if (!match.getArchive() && !match.getTrash() && match.getReminder()) {
+                            Date date = new Date();
+                            String fdate = new SimpleDateFormat(user_date_format).format(date);
+                            String isDate = new SimpleDateFormat("yyyy-MM-d").format(date);
 
-                            data.add(match);
-                            dataAdapter = new NoteDataAdapter(data);
-                            recyclerView.setAdapter(dataAdapter);
-                            dataAdapter.notifyDataSetChanged();
+                            if (fdate.equals(dataModels.get(i).getReminderDate()) || isDate.equals(dataModels.get(i).getReminderDate())) {
+
+                                if (!dataModels.get(i).getArchive() && !dataModels.get(i).getTrash() && dataModels.get(i).getReminder()) {
+
+                                    data.add(dataModels.get(i));
+                                    dataAdapter = new NoteDataAdapter(data);
+                                    recyclerView.setAdapter(dataAdapter);
+                                    dataAdapter.notifyDataSetChanged();
+                                }
+                            }
                         }
                     }
-                }
+                });
 
             }
-        });
+
+        }else{
+
+
+
+        }
+
+
     }
 
     @Override

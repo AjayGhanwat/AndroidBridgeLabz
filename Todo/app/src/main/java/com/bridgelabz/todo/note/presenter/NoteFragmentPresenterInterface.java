@@ -24,5 +24,5 @@ public interface NoteFragmentPresenterInterface {
 
     void resetNotePinRecycler(RecyclerView recyclerView);
 
-    void changeLocation(RecyclerView recyclerView);
+    void changeLocationNote(int startLoc, int endLoc);
 }

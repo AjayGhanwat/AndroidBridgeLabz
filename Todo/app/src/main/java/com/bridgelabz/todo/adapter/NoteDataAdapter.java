@@ -4,8 +4,10 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,8 @@ import android.widget.TextView;
 import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.editnote.view.EditNote;
 import com.bridgelabz.todo.model.DataModel;
+import com.bridgelabz.todo.note.View.NoteFragment;
+import com.bridgelabz.todo.note.interacter.NoteFragmentInteracter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +63,6 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
         holder.card.setCardBackgroundColor(Color.parseColor(hexColor));
         if (list.get(position).getPin()) {
             holder.imageView.setVisibility(View.VISIBLE);
-            holder.imageView.setImageResource(R.drawable.pinned);
         }else
             holder.imageView.setVisibility(View.GONE);
     }
@@ -72,7 +75,7 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
     public class userViewHolder extends RecyclerView.ViewHolder {
         TextView user_Title;
         TextView user_desc;
-        ImageView imageView;
+        AppCompatImageView imageView;
 
         CardView card;
 
@@ -80,7 +83,7 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
             super(itemView);
             user_Title = (TextView) itemView.findViewById(R.id.titleTextView);
             user_desc = (TextView) itemView.findViewById(R.id.descTextView);
-            imageView = (ImageView) itemView.findViewById(R.id.importantPin);
+            imageView = (AppCompatImageView) itemView.findViewById(R.id.importantPin);
             card = (CardView) itemView.findViewById(R.id.cardView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -113,6 +116,7 @@ public class NoteDataAdapter extends RecyclerView.Adapter<NoteDataAdapter.userVi
 
                 }
             });
+
         }
     }
 }

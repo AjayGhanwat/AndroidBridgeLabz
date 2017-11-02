@@ -2,12 +2,13 @@ package com.bridgelabz.todo.archive.interacter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import com.bridgelabz.todo.adapter.ArchiveDataAdapter;
 import com.bridgelabz.todo.archive.presenter.ArchiveFragmentPresenter;
 import com.bridgelabz.todo.archive.presenter.ArchiveFragmentPresenterInterface;
 import com.bridgelabz.todo.model.DataModel;
+import com.bridgelabz.todo.sqlitedatabase.SQLiteDatabaseHandler;
+import com.bridgelabz.todo.util.NetworkConnection;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -16,63 +17,61 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-//import com.google.firebase.database.ChildEventListener;
-//import com.google.firebase.database.DataSnapshot;
-//import com.google.firebase.database.DatabaseError;
-//import com.google.firebase.database.DatabaseReference;
-//import com.google.firebase.database.FirebaseDatabase;
-//import com.google.firebase.database.GenericTypeIndicator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInterface{
+import static android.R.attr.id;
+import static com.bridgelabz.todo.constant.Constant.user_data_FirebaseFirestore;
+import static com.bridgelabz.todo.constant.Constant.user_deleted_notes_restored;
+import static com.bridgelabz.todo.constant.Constant.user_firestore_data_keys;
+import static com.bridgelabz.todo.constant.Constant.user_note_FirebaseFirestore;
+import static com.bridgelabz.todo.constant.Constant.user_note_firebase_database_arch;
 
+public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInterface {
+
+    static String userId;
     Context context;
     ArchiveFragmentPresenterInterface presenter;
-
-    ArrayList<DataModel> data;
+    ArrayList<DataModel> mData;
     ArchiveDataAdapter dataAdapter;
+    FirebaseAuth mAuth;
+    String mId, mDate;
+    CollectionReference mReference;
 
-    public ArchiveFragmentInteracter(Context context, ArchiveFragmentPresenter presenter){
+    public ArchiveFragmentInteracter(Context context, ArchiveFragmentPresenter presenter) {
 
         this.context = context;
         this.presenter = presenter;
 
     }
 
-    FirebaseAuth mAuth;
-    String id,date;
-
-    static String userId;
-    CollectionReference reference;
-
     @Override
     public void showRecyclerData(final RecyclerView recyclerView) {
 
-        data = new ArrayList<>();
+        mData = new ArrayList<>();
         mAuth = FirebaseAuth.getInstance();
 
         userId = mAuth.getCurrentUser().getUid();
 
-        reference = FirebaseFirestore.getInstance().collection("Data").document(userId).collection("Notes");
+        mReference = FirebaseFirestore.getInstance().collection(user_data_FirebaseFirestore).document(userId).collection(user_note_FirebaseFirestore);
 
-        reference.orderBy("key", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot documentSnapshots) {
 
-                for (DocumentSnapshot postSnapshot : documentSnapshots.getDocuments()) {
+                SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(context);
+                ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
 
-                    DataModel match = postSnapshot.toObject(DataModel.class);
+                for (int i = 0; i < dataModels.size(); i++) {
 
-                    boolean isArchive = match.getArchive();
+                    boolean isArchive = dataModels.get(i).getArchive();
 
-                    if(isArchive) {
-                        if(!match.getTrash()) {
-                            data.add(match);
-                            Log.i("sd", "onChildAdded: " + match);
-                            dataAdapter = new ArchiveDataAdapter(data);
+                    if (isArchive) {
+                        if (!dataModels.get(i).getTrash()) {
+                            mData.add(dataModels.get(i));
+                            dataAdapter = new ArchiveDataAdapter(mData);
                             recyclerView.setAdapter(dataAdapter);
                             dataAdapter.notifyDataSetChanged();
                         }
@@ -101,15 +100,15 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
                             public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
 
-                                    id = data.get(position).getId();
-                                    date = data.get(position).getDate();
-                                    changeDataArchive(id,date);
-                                    dataAdapter = new ArchiveDataAdapter(data);
+                                    mId = mData.get(position).getId();
+                                    mDate = mData.get(position).getDate();
+                                    changeDataArchive(mId, mDate);
+                                    dataAdapter = new ArchiveDataAdapter(mData);
                                     recyclerView.setAdapter(dataAdapter);
                                     dataAdapter.notifyDataSetChanged();
-                                    data.remove(position);
+                                    mData.remove(position);
                                     dataAdapter.notifyItemRemoved(position);
-                                    presenter.showSnacBar("Note Restored!");
+                                    presenter.showSnacBar(user_deleted_notes_restored);
                                 }
                                 dataAdapter.notifyDataSetChanged();
                             }
@@ -118,15 +117,15 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
                             public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
 
-                                    id = data.get(position).getId();
-                                    date = data.get(position).getDate();
-                                    changeDataArchive(id,date);
-                                    dataAdapter = new ArchiveDataAdapter(data);
+                                    mId = mData.get(position).getId();
+                                    mDate = mData.get(position).getDate();
+                                    changeDataArchive(mId, mDate);
+                                    dataAdapter = new ArchiveDataAdapter(mData);
                                     recyclerView.setAdapter(dataAdapter);
                                     dataAdapter.notifyDataSetChanged();
-                                    data.remove(position);
+                                    mData.remove(position);
                                     dataAdapter.notifyItemRemoved(position);
-                                    presenter.showSnacBar("Note Restored!");
+                                    presenter.showSnacBar(user_deleted_notes_restored);
                                 }
                                 dataAdapter.notifyDataSetChanged();
                             }
@@ -138,11 +137,38 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
     @Override
     public void undoChangeData() {
 
-        reference = FirebaseFirestore.getInstance().collection("Data").document(userId).collection("Notes");
+        int LocationNOte = -1;
 
-        Map<String, Object> change = new HashMap<>();
-        change.put("archive", true);
-        reference.document(id).update(change);
+        SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(context);
+        ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
+        for (int i = 0; i < dataModels.size(); i++) {
+            if (mId.equals(dataModels.get(i).getId())) {
+                LocationNOte = i;
+            }
+        }
+
+        DataModel dataModel = dataModels.get(LocationNOte);
+
+        mReference = FirebaseFirestore.getInstance().collection(user_data_FirebaseFirestore).document(userId).collection(user_note_FirebaseFirestore);
+
+        if (NetworkConnection.isNetworkConnected(context)) {
+
+            if (NetworkConnection.isInternetAvailable()) {
+
+                Map<String, Object> change = new HashMap<>();
+                change.put(user_note_firebase_database_arch, true);
+                mReference.document(mId).update(change);
+                dataModel.setArchive(true);
+                sqLiteDatabaseHandler.updateRecord(dataModel);
+
+            }
+
+        } else {
+
+            dataModel.setArchive(true);
+            sqLiteDatabaseHandler.updateRecord(dataModel);
+        }
+
     }
 
     @Override
@@ -151,7 +177,7 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
         if (newText != null && !newText.isEmpty()) {
 
             ArrayList<DataModel> userNote = new ArrayList<DataModel>();
-            for (DataModel item : data) {
+            for (DataModel item : mData) {
                 if (item.getTitle().contains(newText)) {
                     userNote.add(item);
                 }
@@ -170,13 +196,38 @@ public class ArchiveFragmentInteracter implements ArchiveFragmentInteracterInter
         recyclerView.setAdapter(dataAdapter);
     }
 
-    void changeDataArchive(final String id,String date){
+    void changeDataArchive(final String mId, String mDate) {
 
-        reference = FirebaseFirestore.getInstance().collection("Data").document(userId).collection("Notes");
+        int LocationNOte = -1;
 
-        Map<String, Object> change = new HashMap<>();
-        change.put("archive", false);
-        reference.document(id).update(change);
+        SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(context);
+        ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
+        for (int i = 0; i < dataModels.size(); i++) {
+            if (mId.equals(dataModels.get(i).getId())) {
+                LocationNOte = i;
+            }
+        }
+
+        DataModel dataModel = dataModels.get(LocationNOte);
+
+        mReference = FirebaseFirestore.getInstance().collection(user_data_FirebaseFirestore).document(userId).collection(user_note_FirebaseFirestore);
+
+        if (NetworkConnection.isNetworkConnected(context)) {
+
+            if (NetworkConnection.isInternetAvailable()) {
+
+                Map<String, Object> change = new HashMap<>();
+                change.put(user_note_firebase_database_arch, false);
+                mReference.document(mId).update(change);
+                dataModel.setArchive(false);
+                sqLiteDatabaseHandler.updateRecord(dataModel);
+            }
+
+        } else {
+
+            dataModel.setArchive(false);
+            sqLiteDatabaseHandler.updateRecord(dataModel);
+        }
 
     }
 }

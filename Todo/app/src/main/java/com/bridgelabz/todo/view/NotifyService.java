@@ -18,7 +18,7 @@ import com.bridgelabz.todo.note.View.NoteFragment;
 
 public class NotifyService extends Service{
 
-    public class ServiceBinder extends Binder {
+    private class ServiceBinder extends Binder {
         NotifyService getService() {
             return NotifyService.this;
         }
@@ -28,11 +28,11 @@ public class NotifyService extends Service{
 
     public static final String INTENT_NOTIFY = "com.bridgelabz.note.view.INTENT_NOTIFY";
 
-    private NotificationManager mNM;
+    private NotificationManager mNotificationManager;
 
     @Override
     public void onCreate() {
-        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
     @Nullable
@@ -56,7 +56,7 @@ public class NotifyService extends Service{
 
         Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        CharSequence title = "Alarm!!";
+        //CharSequence title = "Alarm!!";
 
         int icon = R.mipmap.ic_launcher;
 
@@ -73,17 +73,17 @@ public class NotifyService extends Service{
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, NoteFragment.class), PendingIntent.FLAG_ONE_SHOT);
 
         notification = mBuilder
-                .setContentTitle(AddActivity.title)
-                .setContentText(AddActivity.decs)
+                .setContentTitle(AddActivity.mTitleAlaram)
+                .setContentText(AddActivity.mDecsAlaram)
                 .setTicker("Note Reminder Alert!!")
                 .setContentIntent(contentIntent)
                 .setSound(uri)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(AddActivity.decs))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(AddActivity.mDecsAlaram))
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .build();
 
-        mNM.notify(NOTIFICATION, notification);
+        mNotificationManager.notify(NOTIFICATION, notification);
 
         stopSelf();
 

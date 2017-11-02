@@ -21,36 +21,32 @@ import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.addnotes.presenter.AddNotePresenter;
 import com.bridgelabz.todo.base.BaseActivity;
 import com.bridgelabz.todo.model.DataModel;
+import com.bridgelabz.todo.sqlitedatabase.SQLiteDatabaseHandler;
 import com.bridgelabz.todo.view.ScheduleClient;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 import static com.bridgelabz.todo.R.array.colorArray;
-import static com.bridgelabz.todo.R.drawable.ic_view_quilt_black_24dp;
 import static com.bridgelabz.todo.R.drawable.pin;
 import static com.bridgelabz.todo.R.drawable.pinned;
+import static com.bridgelabz.todo.constant.Constant.null_info;
+import static com.bridgelabz.todo.constant.Constant.user_date_format;
 
 public class AddActivity extends BaseActivity implements AddNotesInterface, ColorDialog.OnColorSelectedListener {
 
+    public static String mTitleAlaram;
+    public static String mDecsAlaram;
+    public String mKey;
+    public String userDate;
     EditText mTitle, mDecs;
-
-    public static String title;
-    public static String decs;
-
     boolean isPinned = false;
-
     AddNotePresenter presenter;
     ProgressDialog progress;
     int year_x, month_x, day_x;
@@ -59,6 +55,8 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
     int hour_x;
     int minute_x;
     int userColor = 16777215;
+    CollectionReference reference;
+    FirebaseAuth mAuth;
     private int Dialog_ID = 0;
     private int TimeDialog_ID = 1;
     private ScheduleClient scheduleClient;
@@ -105,45 +103,26 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
         scheduleClient.doBindService();
     }
 
-    CollectionReference reference;
-
-    FirebaseAuth mAuth;
-
-    public String Key;
-    public String userDate;
-
     @Override
     protected void onStart() {
         super.onStart();
 
         mAuth = FirebaseAuth.getInstance();
 
-        String userID = mAuth.getCurrentUser().getUid();
+        SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(this);
+        ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecordAsc();
+        int lastData = dataModels.size();
 
-        reference = FirebaseFirestore.getInstance().collection("Data").document(userID).collection("Notes");
+        if (lastData == 0) {
 
-        reference.orderBy("key").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-
-                for (DocumentSnapshot postSnapshot : documentSnapshots.getDocuments()) {
-
-                    DataModel match = postSnapshot.toObject(DataModel.class);
-
-                    if (match.getKey() == null && match.getDate() == null) {
-                        Date cDate = new Date();
-
-                        String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
-                        Key = "0";
-                        userDate = fDate;
-                    } else {
-                        Key = match.getKey();
-                        userDate = match.getDate();
-                    }
-                }
-
-            }
-        });
+            Date cDate = new Date();
+            String fDate = new SimpleDateFormat(user_date_format).format(cDate);
+            mKey = null;
+            userDate = fDate;
+        } else {
+            mKey = dataModels.get(lastData - 1).getKey();
+            userDate = dataModels.get(lastData - 1).getDate();
+        }
     }
 
     @Override
@@ -158,10 +137,10 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
     private void getDataStored() {
 
-        if(!TextUtils.isEmpty(title) || !TextUtils.isEmpty(decs)) {
+        if (!TextUtils.isEmpty(mTitleAlaram) || !TextUtils.isEmpty(mDecsAlaram)) {
 
-            String ReminderDate = "null";
-            String ReminderTime = "null";
+            String ReminderDate = null_info;
+            String ReminderTime = null_info;
             boolean reminder = false;
 
             if (mYear != 0 && mMonth != 0 && mDay != 0) {
@@ -187,9 +166,9 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
                 ReminderTime = hour_x + "-" + minute_x;
 
-                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
+                presenter.addnoteReminder(mTitleAlaram, mDecsAlaram, userColor, reminder, ReminderDate, ReminderTime, isPinned, mKey, userDate);
             } else {
-                presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
+                presenter.addnoteReminder(mTitleAlaram, mDecsAlaram, userColor, reminder, ReminderDate, ReminderTime, isPinned, mKey, userDate);
                 if (scheduleClient != null)
                     scheduleClient.doUnbindService();
             }
@@ -208,29 +187,29 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
     public boolean onOptionsItemSelected(MenuItem item) {
 
         getEnterData();
-        String ReminderDate = "null";
-        String ReminderTime = "null";
+        String ReminderDate = null_info;
+        String ReminderTime = null_info;
         boolean reminder = false;
 
         int id = item.getItemId();
 
-        if(id == R.id.pinNote){
+        if (id == R.id.pinNote) {
 
             if (!isPinned) {
                 isPinned = true;
                 item.setIcon(pinned);
-            }else{
+            } else {
                 isPinned = false;
                 item.setIcon(pin);
             }
 
-        }else if (id == R.id.alarmNote) {
+        } else if (id == R.id.alarmNote) {
 
             showDateDialogPicker();
 
         } else if (id == R.id.saveNote) {
 
-            if(!TextUtils.isEmpty(title) || !TextUtils.isEmpty(decs)) {
+            if (!TextUtils.isEmpty(mTitleAlaram) || !TextUtils.isEmpty(mDecsAlaram)) {
 
                 if (mYear != 0 && mMonth != 0 && mDay != 0) {
                     Calendar c = Calendar.getInstance();
@@ -255,9 +234,9 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
                     ReminderTime = hour_x + "-" + minute_x;
 
-                    presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
+                    presenter.addnoteReminder(mTitleAlaram, mDecsAlaram, userColor, reminder, ReminderDate, ReminderTime, isPinned, mKey, userDate);
                 } else {
-                    presenter.addnoteReminder(title, decs, userColor, reminder, ReminderDate, ReminderTime, isPinned, Key, userDate);
+                    presenter.addnoteReminder(mTitleAlaram, mDecsAlaram, userColor, reminder, ReminderDate, ReminderTime, isPinned, mKey, userDate);
                     if (scheduleClient != null)
                         scheduleClient.doUnbindService();
                 }
@@ -276,8 +255,8 @@ public class AddActivity extends BaseActivity implements AddNotesInterface, Colo
 
     private void getEnterData() {
 
-        title = mTitle.getText().toString();
-        decs = mDecs.getText().toString();
+        mTitleAlaram = mTitle.getText().toString();
+        mDecsAlaram = mDecs.getText().toString();
 
     }
 

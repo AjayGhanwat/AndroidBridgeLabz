@@ -1,7 +1,10 @@
 package com.bridgelabz.todo.reminder.view;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +26,9 @@ import com.bridgelabz.todo.model.DataModel;
 import com.bridgelabz.todo.model.UserData;
 import com.bridgelabz.todo.reminder.presenter.ReminderFragmentPresenter;
 import com.bridgelabz.todo.reminder.presenter.ReminderFragmentPresenterInterface;
+import com.bridgelabz.todo.sqlitedatabase.SQLiteDatabaseHandler;
+import com.bridgelabz.todo.util.NetworkChangeReceiver;
+import com.bridgelabz.todo.util.NetworkConnection;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -31,11 +37,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-//import com.google.firebase.database.DataSnapshot;
-//import com.google.firebase.database.DatabaseError;
-//import com.google.firebase.database.DatabaseReference;
-//import com.google.firebase.database.FirebaseDatabase;
-//import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,34 +46,158 @@ import java.util.Map;
 
 import static com.bridgelabz.todo.R.drawable.ic_view_list_black_24dp;
 import static com.bridgelabz.todo.R.drawable.ic_view_quilt_black_24dp;
+import static com.bridgelabz.todo.constant.Constant.user_date_format;
+import static com.bridgelabz.todo.constant.Constant.user_firestore_data_keys;
+import static com.bridgelabz.todo.constant.Constant.user_layouts;
+import static com.bridgelabz.todo.constant.Constant.user_layouts_linear;
+import static com.facebook.FacebookSdk.getApplicationContext;
 
-public class ReminderFragment extends BaseFragment implements ReminderFragmentInterface{
+public class ReminderFragment extends BaseFragment implements ReminderFragmentInterface {
 
-    View v;
+    public static FloatingActionButton fab;
     static RecyclerView recyclerView;
-    ProgressDialog progress;
-
+    static BroadcastReceiver receiver  = new NetworkChangeReceiver();
     static LinearLayoutManager linearLayoutManager;
     static StaggeredGridLayoutManager gridLayoutManager;
     static RecyclerView.LayoutManager layoutManager;
-
-    RelativeLayout relativeLayout;
-
     static ReminderFragmentPresenterInterface presenter;
-
+    static CollectionReference collectionReference;
+    static String userId;
+    static ArrayList<DataModel> DataRefresh;
+    static NoteDataAdapter refreshDataAda;
+    View v;
+    ProgressDialog progress;
+    RelativeLayout relativeLayout;
     String layout;
 
-    static CollectionReference collectionReference;
+    public static void onItemSelected(MenuItem item) {
 
-    static String userId;
+        if (item.getItemId() == R.id.layoutManager) {
+
+            if (!linearLayoutManager.equals(layoutManager)) {
+                layoutManager = linearLayoutManager;
+                item.setIcon(ic_view_quilt_black_24dp);
+                Map<String, Object> changeLayout = new HashMap<>();
+                changeLayout.put(user_layouts, user_layouts_linear);
+                collectionReference.document(userId).set(changeLayout);
+                recyclerView.setLayoutManager(layoutManager);
+            } else if (linearLayoutManager.equals(layoutManager)) {
+                layoutManager = gridLayoutManager;
+                item.setIcon(ic_view_list_black_24dp);
+                Map<String, Object> changeLayout = new HashMap<>();
+                changeLayout.put(user_layouts, "grid");
+                collectionReference.document(userId).set(changeLayout);
+                recyclerView.setLayoutManager(layoutManager);
+            }
+        }
+    }
+
+    public static void searchItem(String newText) {
+
+        presenter.searchItemData(recyclerView, newText);
+
+    }
+
+    public static void resetRecyclerView() {
+        presenter.resetNoteRecycler(recyclerView);
+    }
+
+    /*
+     *  As soon as the fragment opened the event listener is executed
+     *  and the as per the changes in the database the it will change int running app data
+     */
+
+    public static void updateNewData(CollectionReference myDoc) {
+
+        DataRefresh = new ArrayList<>();
+
+        getApplicationContext().registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        if (NetworkConnection.isNetworkConnected(getApplicationContext())) {
+
+            if (NetworkConnection.isInternetAvailable()) {
+
+                myDoc.orderBy(user_firestore_data_keys, Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+
+                        DataRefresh.clear();
+
+                        SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(getApplicationContext());
+                        /*sqLiteDatabaseHandler.deleteAll();*/
+
+                        Date cDate = new Date();
+                        String fDate = new SimpleDateFormat(user_date_format).format(cDate);
+
+                       /* for (DocumentSnapshot documents : documentSnapshots.getDocuments()) {
+
+                            DataModel userData = documents.toObject(DataModel.class);
+
+                            sqLiteDatabaseHandler.insertRecord(userData);
+
+                        }*/
+
+                        ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
+
+                        for (int i = 0; i < dataModels.size(); i++) {
+
+                            if (dataModels.get(i).getReminderDate().equals(fDate)) {
+
+                                if (!dataModels.get(i).getPin() && !dataModels.get(i).getArchive() && !dataModels.get(i).getTrash() && dataModels.get(i).getReminder()) {
+
+                                    DataRefresh.add(dataModels.get(i));
+                                    refreshDataAda = new NoteDataAdapter(DataRefresh);
+                                    recyclerView.setAdapter(refreshDataAda);
+                                    refreshDataAda.notifyDataSetChanged();
+
+                                }
+                            }
+                        }
+                    }
+                });
+
+            }
+
+        } else {
+
+            myDoc.orderBy(user_firestore_data_keys, Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+
+                    DataRefresh.clear();
+
+                    SQLiteDatabaseHandler sqLiteDatabaseHandler = new SQLiteDatabaseHandler(getApplicationContext());
+
+                    Date cDate = new Date();
+                    String fDate = new SimpleDateFormat(user_date_format).format(cDate);
+
+                    ArrayList<DataModel> dataModels = sqLiteDatabaseHandler.getAllRecord();
+
+                    for (int i = 0; i < dataModels.size(); i++) {
+
+                        if (dataModels.get(i).getReminderDate().equals(fDate)) {
+
+                            if (!dataModels.get(i).getPin() && !dataModels.get(i).getArchive() && !dataModels.get(i).getTrash() && dataModels.get(i).getReminder()) {
+
+                                DataRefresh.add(dataModels.get(i));
+                                refreshDataAda = new NoteDataAdapter(DataRefresh);
+                                recyclerView.setAdapter(refreshDataAda);
+                                refreshDataAda.notifyDataSetChanged();
+
+                            }
+                        }
+                    }
+                }
+            });
+
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_reminder, container, false);
     }
-
-    public static FloatingActionButton fab;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -92,7 +217,6 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
         initView();
         clickListning();
 
-
         fab = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,10 +228,10 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
     }
 
     private void isLayout() {
-        if(layout.equals("linear")) {
+        if (layout.equals(user_layouts_linear)) {
             layoutManager = linearLayoutManager;
             recyclerView.setLayoutManager(layoutManager);
-        }else{
+        } else {
             layoutManager = gridLayoutManager;
             recyclerView.setLayoutManager(layoutManager);
         }
@@ -118,6 +242,11 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
         super.onStop();
         isLayout();
     }
+
+    /*
+     *  It is used to retrieve the last layout it is gride or linear as
+     *  per that the recyclerview layout is changed
+     */
 
     @Override
     public void onStart() {
@@ -142,7 +271,7 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
 
     @Override
     public void initView() {
-        presenter = new ReminderFragmentPresenter(getActivity(),this);
+        presenter = new ReminderFragmentPresenter(getActivity(), this);
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerReminder);
         recyclerView.setHasFixedSize(true);
@@ -173,74 +302,5 @@ public class ReminderFragment extends BaseFragment implements ReminderFragmentIn
     @Override
     public void viewReminderRecyclerProgressDismis() {
         progress.dismiss();
-    }
-
-    public static void onItemSelected(MenuItem item) {
-
-        if (item.getItemId() == R.id.layoutManager) {
-
-            if (!linearLayoutManager.equals(layoutManager)) {
-                layoutManager = linearLayoutManager;
-                item.setIcon(ic_view_quilt_black_24dp);
-                Map<String, Object> changeLayout = new HashMap<>();
-                changeLayout.put("layout", "linear");
-                collectionReference.document(userId).set(changeLayout);
-                recyclerView.setLayoutManager(layoutManager);
-            } else if (linearLayoutManager.equals(layoutManager)) {
-                layoutManager = gridLayoutManager;
-                item.setIcon(ic_view_list_black_24dp);
-                Map<String, Object> changeLayout = new HashMap<>();
-                changeLayout.put("layout", "grid");
-                collectionReference.document(userId).set(changeLayout);
-                recyclerView.setLayoutManager(layoutManager);
-            }
-        }
-    }
-
-
-    public static void searchItem(String newText) {
-
-        presenter.searchItemData(recyclerView, newText);
-
-    }
-
-    public static void resetRecyclerView() {
-        presenter.resetNoteRecycler(recyclerView);
-    }
-
-    static ArrayList<DataModel> DataRefresh;
-    static NoteDataAdapter refreshDataAda;
-
-    public static void updateNewData(CollectionReference myDoc) {
-
-        DataRefresh = new ArrayList<>();
-
-        myDoc.orderBy("key", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-
-                DataRefresh.clear();
-
-                Date cDate = new Date();
-                String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
-
-                for (DocumentSnapshot documents : documentSnapshots.getDocuments()){
-
-                    DataModel userData = documents.toObject(DataModel.class);
-
-                    if(userData.getReminderDate().equals(fDate)) {
-
-                        if (!userData.getPin() && !userData.getArchive() && !userData.getTrash() && userData.getReminder()) {
-
-                            DataRefresh.add(userData);
-                            refreshDataAda = new NoteDataAdapter(DataRefresh);
-                            recyclerView.setAdapter(refreshDataAda);
-                            refreshDataAda.notifyDataSetChanged();
-
-                        }
-                    }
-                }
-            }
-        });
     }
 }

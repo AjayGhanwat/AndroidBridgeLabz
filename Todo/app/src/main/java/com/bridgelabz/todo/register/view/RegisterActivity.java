@@ -10,20 +10,33 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.bridgelabz.todo.MainPanelActivity;
 import com.bridgelabz.todo.R;
 import com.bridgelabz.todo.base.BaseActivity;
 import com.bridgelabz.todo.constant.Constant;
 import com.bridgelabz.todo.register.presenter.RegisterUserData;
-import com.bridgelabz.todo.MainPanelActivity;
+
+import static com.bridgelabz.todo.R.string.email;
+import static com.bridgelabz.todo.constant.Constant.enter_correct_password;
+import static com.bridgelabz.todo.constant.Constant.enter_correct_password_contains;
+import static com.bridgelabz.todo.constant.Constant.enter_correct_user_email;
+import static com.bridgelabz.todo.constant.Constant.enter_correct_user_last_name;
+import static com.bridgelabz.todo.constant.Constant.enter_correct_user_name;
+import static com.bridgelabz.todo.constant.Constant.enter_correct_user_phone_number;
+import static com.bridgelabz.todo.constant.Constant.password_must_Matched;
+import static com.bridgelabz.todo.constant.Constant.regex_for_validation;
+import static com.bridgelabz.todo.constant.Constant.regex_for_validation_password;
+import static com.bridgelabz.todo.constant.Constant.regex_for_validation_phone;
 
 public class RegisterActivity extends BaseActivity implements View.OnClickListener, RegisterData {
 
     Toolbar toolbar;
 
-    String First,Last,email,phone,pass,cpass;
+    String mFirst, mLast, mEmail, mPhone, mPass, mComparePass;
 
     RegisterUserData presenter;
-
+    boolean isValide = true;
+    ProgressDialog progress;
     private Button btn_Register;
     private EditText user_First_name, user_Last_Name, user_Email, user_Phone, user_First_Password, user_Second_Password;
 
@@ -38,6 +51,95 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         setTitle(Constant.title_register);
         initView();
         clickListner();
+
+        user_First_name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+
+                    mFirst = user_First_name.getText().toString();
+
+                    if (mFirst.isEmpty() || mFirst.length() > 20) {
+                        user_First_name.setError(enter_correct_user_name);
+                    } else if (!mFirst.matches(regex_for_validation)) {
+                        user_First_name.setError(enter_correct_user_name);
+                    }
+
+                }
+            }
+        });
+
+        user_Last_Name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (!b) {
+
+                    mLast = user_Last_Name.getText().toString();
+
+                    if (mLast.isEmpty() || mLast.length() > 20) {
+
+                        user_Last_Name.setError(enter_correct_user_last_name);
+                    } else if (!mLast.matches(regex_for_validation)) {
+
+                        user_Last_Name.setError(enter_correct_user_last_name);
+                    }
+                }
+            }
+        });
+
+        user_Email.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (!b) {
+                    mEmail = user_Email.getText().toString();
+
+                    if (mEmail.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(mEmail).matches()) {
+                        user_Email.setError(enter_correct_user_email);
+                    }
+                }
+            }
+        });
+
+        user_Phone.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (!b) {
+                    mPhone = user_Phone.getText().toString();
+
+                    if (mPhone.isEmpty() || mPhone.length() != 10) {
+
+                        user_Phone.setError(enter_correct_user_phone_number);
+
+                    } else if (!mPhone.matches(regex_for_validation_phone)) {
+                        user_Phone.setError(enter_correct_user_phone_number);
+                    }
+                }
+            }
+        });
+        user_First_Password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (!b) {
+                    mPass = user_First_Password.getText().toString();
+                    if (mPass.isEmpty() || mPass.length() < 6) {
+                        user_First_Password.setError(enter_correct_password);
+                    } else if (!mPass.matches(regex_for_validation_password)) {
+                        user_First_Password.setError(enter_correct_password_contains);
+                    }
+                }
+            }
+        });
+        user_Second_Password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (!b) {
+                    mComparePass = user_Second_Password.getText().toString();
+                    if (mComparePass.isEmpty() || !mComparePass.equals(mPass)) {
+                        user_Second_Password.setError(password_must_Matched);
+                    }
+                }
+            }
+        });
 
     }
 
@@ -63,80 +165,86 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
 
             case R.id.signRegister:
 
-                if(isValid()) {
-                    presenter.getData(First, Last, email, phone, pass);
+                if (isValid()) {
+                    presenter.getData(mFirst, mLast, mEmail, mPhone, mPass);
                 }
                 break;
         }
     }
 
-    void getEnteredData(){
+    // It gets the user Entered Info from edit text
 
-        First = user_First_name.getText().toString();
-        Last = user_Last_Name.getText().toString();
-        email = user_Email.getText().toString();
-        phone = user_Phone.getText().toString();
-        pass = user_First_Password.getText().toString();
-        cpass = user_Second_Password.getText().toString();
+    void getEnteredData() {
+
+        mFirst = user_First_name.getText().toString();
+        mLast = user_Last_Name.getText().toString();
+        mEmail = user_Email.getText().toString();
+        mPhone = user_Phone.getText().toString();
+        mPass = user_First_Password.getText().toString();
+        mComparePass = user_Second_Password.getText().toString();
 
     }
+
+    /*
+     *  Check the user Entered Data is Valid or not.
+     *  if valid then the next activity performed
+     *  if not valid then it throws the error
+     */
 
     private boolean isValid() {
 
         getEnteredData();
 
-        boolean isValide = true;
-
-        if (First.isEmpty() || First.length() > 20) {
-
-            user_First_name.setError("Enter First Name");
+        if (mFirst.isEmpty() || mFirst.length() > 20) {
+            user_First_name.setError(enter_correct_user_name);
             isValide = false;
-        }else if(!First.matches("^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$")){
-
-            user_First_name.setError("Enter Correct Name");
+        } else if (!mFirst.matches(regex_for_validation)) {
+            user_First_name.setError(enter_correct_user_name);
             isValide = false;
         }
 
-        if (Last.isEmpty() || Last.length() > 20) {
 
-            user_Last_Name.setError("Enter Last Name");
+        if (mLast.isEmpty() || mLast.length() > 20) {
+            user_Last_Name.setError(enter_correct_user_last_name);
             isValide = false;
-        }else if(!Last.matches("^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$")){
+        } else if (!mLast.matches(regex_for_validation)) {
 
-            user_Last_Name.setError("Enter Correct Last Name");
+            user_Last_Name.setError(enter_correct_user_last_name);
             isValide = false;
         }
 
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            user_Email.setError("Enter Valide Email");
+        if (mEmail.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(mEmail).matches()) {
+            user_Email.setError(enter_correct_user_email);
             isValide = false;
         }
 
-        if (phone.isEmpty() || phone.length() != 10) {
 
-            user_Phone.setError("Enter 10 digit Number");
+        if (mPhone.isEmpty() || mPhone.length() != 10) {
+
+            user_Phone.setError(enter_correct_user_phone_number);
             isValide = false;
 
-        }else if(!phone.matches("^[789]{1}[0-9]{9}$")){
-            user_Phone.setError("Phone No Must be Started With 7,8,9");
+        } else if (!mPhone.matches(regex_for_validation_phone)) {
+            user_Phone.setError(enter_correct_user_phone_number);
+            isValide = false;
+        }
+        if (mPass.isEmpty() || mPass.length() < 6) {
+            user_First_Password.setError(enter_correct_password);
+            isValide = false;
+        } else if (!mPass.matches(regex_for_validation_password)) {
+            user_First_Password.setError(enter_correct_password_contains);
             isValide = false;
         }
 
-        if (pass.isEmpty() || pass.length() < 6 ) {
-            user_First_Password.setError("Minimum 6 Charachter");
-            isValide = false;
-        }else if(!pass.matches("^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}[0-9]{0,}$")){
-            user_First_Password.setError("Enter Only Capital and Lower Case Character and 0-9");
+        if (mComparePass.isEmpty() || !mComparePass.equals(mPass)) {
+            user_Second_Password.setError(password_must_Matched);
             isValide = false;
         }
-        if (cpass.isEmpty() || !cpass.equals(pass)) {
-            user_Second_Password.setError("Password Not Matched!!");
-            isValide = false;
-        }
+
         return isValide;
     }
 
@@ -152,7 +260,6 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    ProgressDialog progress;
     @Override
     public void showProgress(String message) {
         progress = new ProgressDialog(this);

@@ -15,6 +15,9 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.InetAddress;
 
+import static com.bridgelabz.todo.constant.Constant.no_internet_availabe;
+import static com.bridgelabz.todo.constant.Constant.no_internet_connection;
+
 public class LoginUserInteracter implements LoginUserInteracterInterface {
 
     Context context;
@@ -22,12 +25,14 @@ public class LoginUserInteracter implements LoginUserInteracterInterface {
 
     FirebaseAuth mAuth;
 
-
     public LoginUserInteracter(Context context, LoginUserPresenter presenter) {
         this.context = context;
         this.presenter = presenter;
     }
 
+    /*
+     *  In the normal logging in that the user is present then the logging the user otherwise it toast the failed
+     */
 
     @Override
     public void userPresent(String email, String pass) {
@@ -54,9 +59,9 @@ public class LoginUserInteracter implements LoginUserInteracterInterface {
                 });
 
             } else
-                Toast.makeText(context, "No Internet Availabe!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, no_internet_availabe, Toast.LENGTH_SHORT).show();
         } else
-            Toast.makeText(context, "No Internet Connection!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, no_internet_connection, Toast.LENGTH_SHORT).show();
 
 
     }

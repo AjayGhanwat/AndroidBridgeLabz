@@ -19,5 +19,5 @@ public interface NoteFragmentInteracterInterface {
 
     void resetPinRecycler(RecyclerView recyclerView);
 
-    void onChangeLocation(RecyclerView recyclerView);
+    void changeLocationNote(int startLoc, int endLoc);
 }

@@ -48,8 +48,8 @@ public class NoteFragmentPresenter implements NoteFragmentPresenterInterface{
     }
 
     @Override
-    public void changeLocation(RecyclerView recyclerView) {
-        interacterInterface.onChangeLocation(recyclerView);
+    public void changeLocationNote(int startLoc, int endLoc) {
+        interacterInterface.changeLocationNote(startLoc, endLoc);
     }
 
     @Override
